@@ -1,4 +1,4 @@
-import { domAnimation, LazyMotion } from "motion/react";
+import { domMax, LazyMotion } from "motion/react";
 import type { ReactNode } from "react";
 
 type MotionProviderProps = {
@@ -7,7 +7,7 @@ type MotionProviderProps = {
 
 export function MotionProvider({ children }: MotionProviderProps) {
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       {children}
     </LazyMotion>
   );
