@@ -20,5 +20,18 @@ services:
     volumes:
       - convex-data:/convex/data
 
+  convex-deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile.convex-deploy
+    image: esc-app-convex-deploy:local
+    environment:
+      CONVEX_URL: ${CONVEX_URL:-}
+      CONVEX_SELF_HOSTED_URL: ${CONVEX_SELF_HOSTED_URL:-}
+      CONVEX_SELF_HOSTED_ADMIN_KEY: ${CONVEX_SELF_HOSTED_ADMIN_KEY:?Set CONVEX_SELF_HOSTED_ADMIN_KEY}
+    restart: "no"
+    profiles:
+      - deploy
+
 volumes:
   convex-data:

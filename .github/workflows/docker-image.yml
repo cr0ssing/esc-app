@@ -18,6 +18,16 @@ jobs:
       contents: read
       packages: write
 
+    strategy:
+      matrix:
+        include:
+          - id: app
+            dockerfile: Dockerfile
+            image: ${{ github.repository }}
+          - id: convex-deploy
+            dockerfile: Dockerfile.convex-deploy
+            image: ${{ github.repository }}-convex-deploy
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,7 +47,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ matrix.image }}
           tags: |
             type=sha,prefix=sha-
             type=ref,event=tag
@@ -47,8 +57,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ${{ matrix.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.id }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.id }}

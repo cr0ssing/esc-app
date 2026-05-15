@@ -1,0 +1,15 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml convex.json ./
+RUN pnpm install --frozen-lockfile
+
+COPY convex ./convex
+
+COPY scripts/convex-deploy-entrypoint.sh /usr/local/bin/convex-deploy-entrypoint.sh
+RUN chmod +x /usr/local/bin/convex-deploy-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/convex-deploy-entrypoint.sh"]
