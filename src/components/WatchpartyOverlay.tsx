@@ -182,8 +182,8 @@ export function ReorderByPointsOverlay({ onConfirm, onClose }: ReorderByPointsOv
           type="button"
           className={cn(
             controlButtonBase,
-            "min-h-11 flex-1 border border-emphasis/55 bg-emphasis/12 text-emphasis",
-            "hover:-translate-y-px hover:border-emphasis hover:bg-emphasis/22",
+            "min-h-11 flex-1 border border-green-500/55 bg-green-600/18 text-green-200",
+            "hover:-translate-y-px hover:border-green-400/80 hover:bg-green-600/28",
           )}
           onClick={onConfirm}
         >

@@ -5,6 +5,13 @@ import "./styles.css";
 import { App } from "./App";
 import { MotionProvider } from "./components/MotionProvider";
 import { getConvexUrl } from "./lib/convexUrl";
+import { syncStandalonePwaAttribute } from "./lib/standaloneDisplayMode";
+
+syncStandalonePwaAttribute();
+
+for (const query of ["(display-mode: standalone)", "(display-mode: fullscreen)"] as const) {
+  window.matchMedia(query).addEventListener("change", syncStandalonePwaAttribute);
+}
 
 const convexUrl = getConvexUrl();
 

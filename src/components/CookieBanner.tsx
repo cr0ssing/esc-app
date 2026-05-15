@@ -20,7 +20,7 @@ export function CookieBanner({ visible, onClose, onOpenDatenschutz }: CookieBann
 
   return (
     <div
-      className="fixed inset-x-0 bottom-[58px] z-20 mx-auto w-full max-w-[820px] px-3 min-[680px]:px-[18px]"
+      className="fixed inset-x-0 bottom-[calc(58px+var(--pwa-tab-bar-extra-bottom))] z-20 mx-auto w-full max-w-[820px] px-3 min-[680px]:px-[18px]"
       role="dialog"
       aria-labelledby="cookie-banner-title"
       aria-describedby="cookie-banner-desc"

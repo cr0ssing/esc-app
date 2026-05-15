@@ -53,6 +53,17 @@
   font-synthesis: none;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
+  --pwa-tab-bar-extra-bottom: 0px;
+  --pwa-main-padding-top-base: 18px;
+}
+
+/*
+ * `data-standalone-pwa` is toggled synchronously in `main.tsx` (see standaloneDisplayMode.ts).
+ * Uses max(...) so home-indicator safe-area wins when larger than the base cushion.
+ */
+:root[data-standalone-pwa] {
+  --pwa-tab-bar-extra-bottom: max(1.25rem, env(safe-area-inset-bottom, 0));
+  --pwa-main-padding-top-base: 0px;
 }
 
 html {

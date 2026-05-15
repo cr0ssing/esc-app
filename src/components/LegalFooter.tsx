@@ -18,7 +18,7 @@ export function LegalFooter({ view, onNavigate, onReopenCookies }: LegalFooterPr
   const onLegalPage = view === "credits" || view === "impressum" || view === "datenschutz";
 
   return (
-    <footer className="flex flex-col items-center gap-2 px-0 py-[26px] pb-1">
+    <footer className="flex flex-col items-center gap-2 px-0 pt-[26px]">
       {onLegalPage ? (
         <button type="button" className={linkClass} onClick={() => onNavigate("show")}>
           Zurück
