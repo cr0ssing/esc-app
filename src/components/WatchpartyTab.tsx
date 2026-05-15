@@ -154,44 +154,49 @@ export function WatchpartyTab({
 
     return (
       <>
-        <motion.div className="mx-auto flex min-h-[calc(100dvh-11rem)] w-2/3 max-w-full flex-col justify-center gap-2">
-          <input
-            id="watchparty-name"
-            className="m-0 box-border h-10 w-full border border-border bg-input/45 px-2.5 text-center text-sm text-foreground placeholder:text-center outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/70"
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            placeholder="Name eingeben"
-            autoComplete="nickname"
-            aria-label="Dein Name"
-          />
-          <button
-            type="button"
-            className={cn(
-              controlButtonBase,
-              controlButtonIdle,
-              "min-h-11 w-full",
-              (!nameReady || busy) && controlButtonDisabled,
-            )}
-            disabled={!nameReady || busy}
-            onClick={() => setOverlay("join")}
-          >
-            Watchparty beitreten
-          </button>
-          <button
-            type="button"
-            className={cn(
-              controlButtonBase,
-              controlButtonIdle,
-              "min-h-11 w-full",
-              (!nameReady || busy) && controlButtonDisabled,
-            )}
-            disabled={!nameReady || busy}
-            onClick={() => void handleCreate()}
-          >
-            Neue Watchparty
-          </button>
-          {error && !overlay ? <p className="m-0 text-center text-sm text-emphasis">{error}</p> : null}
-        </motion.div>
+        <div className="relative mx-auto h-full min-h-0 w-2/3 max-w-full">
+          <h1 className="absolute inset-x-0 -top-10 m-0 flex h-1/2 items-center justify-center text-center text-[clamp(2.75rem,14vw,5.5rem)] leading-[0.9] font-extrabold text-foreground">
+            Watchparty
+          </h1>
+          <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col gap-2">
+            <input
+              id="watchparty-name"
+              className="m-0 box-border h-10 w-full border border-border bg-input/45 px-2.5 text-center text-sm text-foreground placeholder:text-center outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/70"
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              placeholder="Name eingeben"
+              autoComplete="nickname"
+              aria-label="Dein Name"
+            />
+            <button
+              type="button"
+              className={cn(
+                controlButtonBase,
+                controlButtonIdle,
+                "min-h-11 w-full",
+                (!nameReady || busy) && controlButtonDisabled,
+              )}
+              disabled={!nameReady || busy}
+              onClick={() => setOverlay("join")}
+            >
+              Watchparty beitreten
+            </button>
+            <button
+              type="button"
+              className={cn(
+                controlButtonBase,
+                controlButtonIdle,
+                "min-h-11 w-full",
+                (!nameReady || busy) && controlButtonDisabled,
+              )}
+              disabled={!nameReady || busy}
+              onClick={() => void handleCreate()}
+            >
+              Neue Watchparty
+            </button>
+            {error && !overlay ? <p className="m-0 text-center text-sm text-emphasis">{error}</p> : null}
+          </div>
+        </div>
 
         {overlay === "create" && createdInviteUrl ? (
           <InviteLinkOverlay inviteUrl={createdInviteUrl} onClose={() => setOverlay("none")} />

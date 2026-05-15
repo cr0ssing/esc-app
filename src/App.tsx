@@ -13,7 +13,7 @@ import { RankedList } from "./components/RankedList";
 import { SongCard } from "./components/SongCard";
 import { ViewTabs } from "./components/ViewTabs";
 import { WatchpartyTab } from "./components/WatchpartyTab";
-import { InviteLinkOverlay } from "./components/WatchpartyOverlay";
+import { InviteLinkOverlay, LeaveWatchpartyOverlay } from "./components/WatchpartyOverlay";
 import type { Song, ViewMode, VoteState } from "./types";
 
 const songs = rawSongs as Song[];
@@ -22,6 +22,8 @@ export function App() {
   const [view, setView] = useState<ViewMode>("show");
   const [state, setState] = useState<VoteState>(() => loadVoteState(songs));
   const [showInviteOverlay, setShowInviteOverlay] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [isLeavingWatchparty, setIsLeavingWatchparty] = useState(false);
   const initialPartyCode = useMemo(() => getPartyCodeFromUrl(), []);
 
   const {
@@ -40,6 +42,13 @@ export function App() {
       setView("watchparty");
     }
   }, [initialPartyCode, isActive, isLoading]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setShowLeaveConfirm(false);
+      setIsLeavingWatchparty(false);
+    }
+  }, [isActive]);
 
   useVoteSync({ sessionToken, isActive, state, setState });
 
@@ -140,6 +149,7 @@ export function App() {
         <motion.section
           key="watchparty"
           aria-label="Watchparty"
+          className={!isActive ? "flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1" : undefined}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
@@ -190,7 +200,7 @@ export function App() {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[820px] px-3 pb-[104px] pt-[18px] min-[680px]:px-[18px]">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[820px] flex-col px-3 pb-[104px] pt-[18px] min-[680px]:px-[18px]">
       <header className="flex items-end justify-between gap-[18px] px-0.5 pb-[18px] pt-3">
         <div>
           <p className="m-0 mb-1 text-[0.76rem] font-bold tracking-[0.08em] uppercase text-muted-foreground">Vienna · 16.05.2026</p>
@@ -213,7 +223,7 @@ export function App() {
                 aria-label="Watchparty verlassen"
                 onClick={() => {
                   setShowInviteOverlay(false);
-                  void leaveWatchparty();
+                  setShowLeaveConfirm(true);
                 }}
               >
                 <LogOut size={18} aria-hidden="true" />
@@ -238,7 +248,9 @@ export function App() {
         </div>
       </header>
 
-      <AnimatePresence mode="wait">{contentForView()}</AnimatePresence>
+      <div className={cn("min-h-0", view === "watchparty" && !isActive && "flex flex-1 flex-col")}>
+        <AnimatePresence mode="wait">{contentForView()}</AnimatePresence>
+      </div>
 
       {view === "watchparty" && !isActive ? null : (
         <footer className="flex justify-center px-0 py-[26px] pb-1">
@@ -256,6 +268,24 @@ export function App() {
 
       {showInviteOverlay && inviteUrl ? (
         <InviteLinkOverlay inviteUrl={inviteUrl} onClose={() => setShowInviteOverlay(false)} />
+      ) : null}
+
+      {showLeaveConfirm ? (
+        <LeaveWatchpartyOverlay
+          isLeaving={isLeavingWatchparty}
+          onClose={() => {
+            if (!isLeavingWatchparty) {
+              setShowLeaveConfirm(false);
+            }
+          }}
+          onConfirm={() => {
+            setIsLeavingWatchparty(true);
+            void leaveWatchparty().finally(() => {
+              setIsLeavingWatchparty(false);
+              setShowLeaveConfirm(false);
+            });
+          }}
+        />
       ) : null}
     </main>
   );
