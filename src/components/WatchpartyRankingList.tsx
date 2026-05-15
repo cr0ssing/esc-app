@@ -1,5 +1,5 @@
 import { useQuery } from "convex/react";
-import { LayoutGroup, motion } from "motion/react";
+import { LayoutGroup, m } from "motion/react";
 import { useMemo } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Song } from "../types";
@@ -22,7 +22,7 @@ export function WatchpartyRankingList({ songs, sessionToken }: WatchpartyRanking
     }
 
     const totals = new Map(aggregate.map((entry) => [entry.songId, entry.totalPoints]));
-    return [...songs].sort((a, b) => {
+    return songs.toSorted((a, b) => {
       const totalA = totals.get(a.id) ?? -1;
       const totalB = totals.get(b.id) ?? -1;
       if (totalA !== totalB) {
@@ -46,7 +46,7 @@ export function WatchpartyRankingList({ songs, sessionToken }: WatchpartyRanking
 
   return (
     <LayoutGroup id="watchparty-ranking">
-      <motion.div className="grid gap-3" layout>
+      <m.div className="grid gap-3" layout>
         {rankedSongs.map((song, index) => (
           <SongCard
             key={song.id}
@@ -65,7 +65,7 @@ export function WatchpartyRankingList({ songs, sessionToken }: WatchpartyRanking
             onPersonalPickChange={() => { }}
           />
         ))}
-      </motion.div>
+      </m.div>
     </LayoutGroup>
   );
 }

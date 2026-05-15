@@ -1,7 +1,7 @@
 import { closestCenter, DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useState } from "react";
 import { cn } from "../lib/cn";
 import type { Song, VoteState } from "../types";
@@ -46,7 +46,7 @@ export function RankedList({ songs, state, onReorder, onPatch, onPointsChange }:
       }}
     >
       <SortableContext items={songs.map((song) => song.id)} strategy={verticalListSortingStrategy}>
-        <motion.div className="grid gap-3">
+        <m.div className="grid gap-3">
           {songs.map((song, index) => (
             <SortableSong
               key={song.id}
@@ -58,7 +58,7 @@ export function RankedList({ songs, state, onReorder, onPatch, onPointsChange }:
               onPointsChange={onPointsChange}
             />
           ))}
-        </motion.div>
+        </m.div>
       </SortableContext>
     </DndContext>
   );
@@ -81,7 +81,7 @@ function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }:
   };
 
   return (
-    <motion.div
+    <m.div
       ref={setNodeRef}
       style={style}
       layout={!isSorting}
@@ -108,6 +108,6 @@ function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }:
         onWinnerPredictionChange={() => onPatch({ winnerPredictionId: state.winnerPredictionId === song.id ? null : song.id })}
         onPersonalPickChange={() => onPatch({ personalPickId: state.personalPickId === song.id ? null : song.id })}
       />
-    </motion.div>
+    </m.div>
   );
 }

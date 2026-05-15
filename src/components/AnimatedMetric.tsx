@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 
@@ -36,7 +36,7 @@ export function AnimatedMetric({ value, className, emphasis = "default" }: Anima
   }
 
   return (
-    <motion.span
+    <m.span
       key={pulse}
       className={cn("inline-block origin-center", className)}
       initial={pulse === 0 ? false : { scale: 0.88, opacity: 0.55 }}
@@ -52,6 +52,6 @@ export function AnimatedMetric({ value, className, emphasis = "default" }: Anima
       transition={pulseTransition}
     >
       {value}
-    </motion.span>
+    </m.span>
   );
 }

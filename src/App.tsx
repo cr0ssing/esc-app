@@ -1,6 +1,6 @@
 import { ArrowUpDown, LogOut, Share2 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, m } from "motion/react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import rawSongs from "./data/songs.json";
 import { useVoteSync } from "./hooks/useVoteSync";
 import { useWatchpartySession } from "./hooks/useWatchpartySession";
@@ -18,12 +18,55 @@ import type { Song, ViewMode, VoteState } from "./types";
 
 const songs = rawSongs as Song[];
 
+type WatchpartyChromeState = {
+  showInviteOverlay: boolean;
+  showLeaveConfirm: boolean;
+  isLeavingWatchparty: boolean;
+};
+
+type WatchpartyChromeAction =
+  | { type: "openInvite" }
+  | { type: "openLeaveConfirm" }
+  | { type: "closeOverlays" }
+  | { type: "startLeaving" }
+  | { type: "finishLeaving" }
+  | { type: "resetAfterInactive" };
+
+const initialWatchpartyChrome: WatchpartyChromeState = {
+  showInviteOverlay: false,
+  showLeaveConfirm: false,
+  isLeavingWatchparty: false,
+};
+
+function watchpartyChromeReducer(
+  state: WatchpartyChromeState,
+  action: WatchpartyChromeAction,
+): WatchpartyChromeState {
+  switch (action.type) {
+    case "openInvite":
+      return { ...state, showInviteOverlay: true };
+    case "openLeaveConfirm":
+      return { showInviteOverlay: false, showLeaveConfirm: true, isLeavingWatchparty: false };
+    case "closeOverlays":
+      return initialWatchpartyChrome;
+    case "startLeaving":
+      return { ...state, isLeavingWatchparty: true };
+    case "finishLeaving":
+      return initialWatchpartyChrome;
+    case "resetAfterInactive":
+      return { ...state, showLeaveConfirm: false, isLeavingWatchparty: false };
+    default:
+      return state;
+  }
+}
+
 export function App() {
   const [view, setView] = useState<ViewMode>("show");
   const [state, setState] = useState<VoteState>(() => loadVoteState(songs));
-  const [showInviteOverlay, setShowInviteOverlay] = useState(false);
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-  const [isLeavingWatchparty, setIsLeavingWatchparty] = useState(false);
+  const [watchpartyChrome, dispatchWatchpartyChrome] = useReducer(
+    watchpartyChromeReducer,
+    initialWatchpartyChrome,
+  );
   const initialPartyCode = useMemo(() => getPartyCodeFromUrl(), []);
 
   const {
@@ -45,8 +88,7 @@ export function App() {
 
   useEffect(() => {
     if (!isActive) {
-      setShowLeaveConfirm(false);
-      setIsLeavingWatchparty(false);
+      dispatchWatchpartyChrome({ type: "resetAfterInactive" });
     }
   }, [isActive]);
 
@@ -98,7 +140,7 @@ export function App() {
   function contentForView() {
     if (view === "credits") {
       return (
-        <motion.section
+        <m.section
           key="credits"
           aria-label="Bildnachweise"
           initial={{ opacity: 0, y: 10 }}
@@ -108,9 +150,9 @@ export function App() {
         >
           <div className="my-3 mb-4">
             <p className="m-0 mb-1 text-xs font-extrabold uppercase text-muted-foreground">Credits</p>
-            <h2 className="m-0 text-[1.7rem] font-extrabold text-foreground">Bildnachweise</h2>
+            <h2 className="m-0 text-[1.7rem] font-semibold text-foreground">Bildnachweise</h2>
           </div>
-          <motion.div className="grid gap-2">
+          <m.div className="grid gap-2">
             {songs.map((song) => (
               <a
                 key={song.id}
@@ -124,14 +166,14 @@ export function App() {
                 <small className="text-xs text-secondary-foreground">{song.imageCredit ?? "Eurovision Song Contest"}</small>
               </a>
             ))}
-          </motion.div>
-        </motion.section>
+          </m.div>
+        </m.section>
       );
     }
 
     if (view === "ranking") {
       return (
-        <motion.section
+        <m.section
           key="ranking"
           aria-label="Ranking"
           initial={{ opacity: 0, y: 10 }}
@@ -140,13 +182,13 @@ export function App() {
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
           <RankedList songs={rankedSongs} state={state} onPatch={patchState} onPointsChange={setSongPoints} onReorder={(ids) => patchState({ manualRankOrder: ids })} />
-        </motion.section>
+        </m.section>
       );
     }
 
     if (view === "watchparty") {
       return (
-        <motion.section
+        <m.section
           key="watchparty"
           aria-label="Watchparty"
           className={!isActive ? "flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1" : undefined}
@@ -167,12 +209,12 @@ export function App() {
             onCreate={handleCreateWatchparty}
             onJoin={handleJoinWatchparty}
           />
-        </motion.section>
+        </m.section>
       );
     }
 
     return (
-      <motion.section
+      <m.section
         key="show"
         className="grid gap-3"
         aria-label="Show-Reihenfolge"
@@ -195,7 +237,7 @@ export function App() {
             onPersonalPickChange={() => patchState({ personalPickId: state.personalPickId === song.id ? null : song.id })}
           />
         ))}
-      </motion.section>
+      </m.section>
     );
   }
 
@@ -204,7 +246,7 @@ export function App() {
       <header className="flex items-end justify-between gap-[18px] px-0.5 pb-[18px] pt-3">
         <div>
           <p className="m-0 mb-1 text-[0.76rem] font-bold tracking-[0.08em] uppercase text-muted-foreground">Vienna · 16.05.2026</p>
-          <h1 className="m-0 text-[clamp(2rem,10vw,4.8rem)] leading-[0.9] font-extrabold text-foreground">ESC 2026</h1>
+          <h1 className="m-0 text-[clamp(2rem,10vw,4.8rem)] leading-[0.9] font-semibold text-foreground">ESC 2026</h1>
         </div>
         <div className="flex items-stretch gap-2">
           {view === "watchparty" && isActive && inviteUrl ? (
@@ -213,7 +255,7 @@ export function App() {
                 type="button"
                 className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
                 aria-label="Einladungslink teilen"
-                onClick={() => setShowInviteOverlay(true)}
+                onClick={() => dispatchWatchpartyChrome({ type: "openInvite" })}
               >
                 <Share2 size={18} aria-hidden="true" />
               </button>
@@ -221,10 +263,7 @@ export function App() {
                 type="button"
                 className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
                 aria-label="Watchparty verlassen"
-                onClick={() => {
-                  setShowInviteOverlay(false);
-                  setShowLeaveConfirm(true);
-                }}
+                onClick={() => dispatchWatchpartyChrome({ type: "openLeaveConfirm" })}
               >
                 <LogOut size={18} aria-hidden="true" />
               </button>
@@ -266,23 +305,25 @@ export function App() {
 
       <ViewTabs value={view === "credits" ? "show" : view} onChange={setView} />
 
-      {showInviteOverlay && inviteUrl ? (
-        <InviteLinkOverlay inviteUrl={inviteUrl} onClose={() => setShowInviteOverlay(false)} />
+      {watchpartyChrome.showInviteOverlay && inviteUrl ? (
+        <InviteLinkOverlay
+          inviteUrl={inviteUrl}
+          onClose={() => dispatchWatchpartyChrome({ type: "closeOverlays" })}
+        />
       ) : null}
 
-      {showLeaveConfirm ? (
+      {watchpartyChrome.showLeaveConfirm ? (
         <LeaveWatchpartyOverlay
-          isLeaving={isLeavingWatchparty}
+          isLeaving={watchpartyChrome.isLeavingWatchparty}
           onClose={() => {
-            if (!isLeavingWatchparty) {
-              setShowLeaveConfirm(false);
+            if (!watchpartyChrome.isLeavingWatchparty) {
+              dispatchWatchpartyChrome({ type: "closeOverlays" });
             }
           }}
           onConfirm={() => {
-            setIsLeavingWatchparty(true);
+            dispatchWatchpartyChrome({ type: "startLeaving" });
             void leaveWatchparty().finally(() => {
-              setIsLeavingWatchparty(false);
-              setShowLeaveConfirm(false);
+              dispatchWatchpartyChrome({ type: "finishLeaving" });
             });
           }}
         />

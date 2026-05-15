@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { getRankedSongs } from "../lib/ranking";
 import type { Song, VoteState } from "../types";
 import { SongCard } from "./SongCard";
@@ -12,7 +12,7 @@ export function ReadOnlyRankedList({ songs, state }: ReadOnlyRankedListProps) {
   const rankedSongs = getRankedSongs(songs, state);
 
   return (
-    <motion.div className="grid gap-3">
+    <m.div className="grid gap-3">
       {rankedSongs.map((song, index) => (
         <SongCard
           key={song.id}
@@ -25,12 +25,12 @@ export function ReadOnlyRankedList({ songs, state }: ReadOnlyRankedListProps) {
           note={state.notesBySongId[song.id] ?? ""}
           isWinnerPrediction={state.winnerPredictionId === song.id}
           isPersonalPick={state.personalPickId === song.id}
-          onPointsChange={() => {}}
-          onNoteChange={() => {}}
-          onWinnerPredictionChange={() => {}}
-          onPersonalPickChange={() => {}}
+          onPointsChange={() => { }}
+          onNoteChange={() => { }}
+          onWinnerPredictionChange={() => { }}
+          onPersonalPickChange={() => { }}
         />
       ))}
-    </motion.div>
+    </m.div>
   );
 }

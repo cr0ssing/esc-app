@@ -28,10 +28,23 @@ export function loadVoteState(songs: Song[]): VoteState {
     }
 
     const knownIds = new Set(songs.map((song) => song.id));
-    const manualRankOrder = [
-      ...(parsed.manualRankOrder ?? []).filter((id) => knownIds.has(id)),
-      ...songs.map((song) => song.id).filter((id) => !parsed.manualRankOrder?.includes(id)),
-    ];
+    const savedOrder = parsed.manualRankOrder ?? [];
+    const manualRankOrder: string[] = [];
+    const seen = new Set<string>();
+
+    for (const id of savedOrder) {
+      if (knownIds.has(id) && !seen.has(id)) {
+        manualRankOrder.push(id);
+        seen.add(id);
+      }
+    }
+
+    for (const song of songs) {
+      if (!seen.has(song.id)) {
+        manualRankOrder.push(song.id);
+        seen.add(song.id);
+      }
+    }
 
     return {
       schemaVersion: 1,

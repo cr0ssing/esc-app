@@ -1,11 +1,11 @@
 import { ChevronLeft } from "lucide-react";
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { AnimatePresence, LayoutGroup, m } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 import { getAvatarUrl } from "../lib/avatar";
 import { controlButtonBase, controlButtonIdle } from "../lib/ui";
 
-export type WatchpartyMember = {
+type WatchpartyMember = {
   userId: string;
   displayName: string;
 };
@@ -28,7 +28,7 @@ function MemberAvatar({
   layoutId: string;
 }) {
   return (
-    <motion.img
+    <m.img
       layoutId={layoutId}
       src={getAvatarUrl(userId)}
       alt=""
@@ -71,7 +71,7 @@ export function WatchpartyMemberBar({
       <div className="relative min-h-[88px]">
         <AnimatePresence mode="popLayout" initial={false}>
           {isDetail && selectedMember ? (
-            <motion.div
+            <m.div
               key="detail"
               className="grid grid-cols-[42px_1fr_42px] gap-x-2"
               initial={{ opacity: 0 }}
@@ -91,7 +91,7 @@ export function WatchpartyMemberBar({
                 </button>
               </div>
 
-              <motion.div
+              <m.div
                 className="flex flex-col items-center gap-1.5 justify-self-center"
                 layout
                 transition={{ type: "spring", stiffness: 420, damping: 36 }}
@@ -101,19 +101,19 @@ export function WatchpartyMemberBar({
                   highlighted
                   layoutId={`watchparty-avatar-${selectedMember.userId}`}
                 />
-                <motion.span
+                <m.span
                   layout
                   className="max-w-[min(100%,220px)] truncate text-center text-[0.72rem] font-extrabold text-foreground"
                 >
                   {selectedMember.displayName}
                   {currentUserId === selectedMember.userId ? " (du)" : ""}
-                </motion.span>
-              </motion.div>
+                </m.span>
+              </m.div>
 
-              <motion.div aria-hidden="true" className="h-14 w-[42px]" />
-            </motion.div>
+              <m.div aria-hidden="true" className="h-14 w-[42px]" />
+            </m.div>
           ) : (
-            <motion.div
+            <m.div
               key="list"
               className={cn(
                 "scrollbar-overlay -mx-1 flex max-h-46 min-w-0 max-w-full flex-wrap gap-3 overflow-y-auto overflow-x-hidden px-1 pb-1",
@@ -150,7 +150,7 @@ export function WatchpartyMemberBar({
                   </button>
                 );
               })}
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

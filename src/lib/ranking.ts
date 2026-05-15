@@ -5,7 +5,7 @@ export const ESC_POINTS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] as const;
 export function getRankedSongs(songs: Song[], state: VoteState) {
   const rankIndex = new Map(state.manualRankOrder.map((id, index) => [id, index]));
 
-  return [...songs].sort((a, b) => {
+  return songs.toSorted((a, b) => {
     const manualA = rankIndex.get(a.id) ?? Number.MAX_SAFE_INTEGER;
     const manualB = rankIndex.get(b.id) ?? Number.MAX_SAFE_INTEGER;
 
@@ -18,8 +18,8 @@ export function getRankedSongs(songs: Song[], state: VoteState) {
 }
 
 export function createPointsOrder(songs: Song[], pointsBySongId: VoteState["pointsBySongId"]) {
-  return [...songs]
-    .sort((a, b) => {
+  return songs
+    .toSorted((a, b) => {
       const pointsA = pointsBySongId[a.id] ?? -1;
       const pointsB = pointsBySongId[b.id] ?? -1;
 

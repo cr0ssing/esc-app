@@ -1,5 +1,5 @@
 import { Heart, Trophy } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import type { PointerEvent, ReactNode } from "react";
 import { cn } from "../lib/cn";
 import { getFlagUrl } from "../lib/flags";
@@ -117,7 +117,7 @@ export function SongCard({
   );
 
   return (
-    <motion.article
+    <m.article
       className="app-surface grid min-h-[216px] grid-cols-[132px_1fr] border border-border-strong shadow-card min-[680px]:min-h-[238px] min-[680px]:grid-cols-[224px_1fr]"
       layout={layout}
       initial={{ opacity: 0, y: 14 }}
@@ -156,7 +156,7 @@ export function SongCard({
             <span className="truncate">{song.countryDe}</span>
           </div>
           {showBadges ? (
-            <motion.div className="-mr-1.5 flex shrink-0 justify-start gap-0">
+            <m.div className="-mr-1.5 flex shrink-0 justify-start gap-0">
               <SparkleButton
                 sparkleVariant="golden"
                 whileTap={{ scale: 0.9, rotate: -5 }}
@@ -193,7 +193,7 @@ export function SongCard({
                   strokeWidth={isPersonalPick ? 1.75 : 2}
                 />
               </SparkleButton>
-            </motion.div>
+            </m.div>
           ) : null}
         </div>
 
@@ -204,7 +204,7 @@ export function SongCard({
             ariaLabel={`${song.artist} bei Eurovision öffnen`}
             onPointerDown={stopSortDrag}
           >
-            <h2 className="m-0 inline text-[1.08rem] leading-[1.05] font-extrabold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
+            <h2 className="m-0 inline text-[1.08rem] leading-[1.05] font-semibold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
               {song.artist}
             </h2>
           </ParticipantLink>
@@ -227,9 +227,9 @@ export function SongCard({
             )}
           </p>
         ) : showVoteControls ? (
-          <motion.div onPointerDown={stopSortDrag}>
+          <m.div onPointerDown={stopSortDrag}>
             <PointsPicker value={points} onChange={onPointsChange} />
-          </motion.div>
+          </m.div>
         ) : (
           <p className="m-0 text-xl font-extrabold tabular-nums text-foreground">{pointsLabel}</p>
         )}
@@ -248,6 +248,6 @@ export function SongCard({
           <p className="m-0 line-clamp-2 text-sm leading-snug text-foreground-subtle">{note}</p>
         ) : null}
       </div>
-    </motion.article>
+    </m.article>
   );
 }

@@ -38,16 +38,21 @@ const aggregateEntryValidator = v.object({
 });
 
 async function uniqueInviteCode(ctx: MutationCtx) {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    const inviteCode = generateInviteCode();
-    const existing = await ctx.db
-      .query("watchparties")
-      .withIndex("by_inviteCode", (q) => q.eq("inviteCode", inviteCode))
-      .unique();
-    if (!existing) {
-      return inviteCode;
-    }
+  const candidates = Array.from({ length: 10 }, () => generateInviteCode());
+  const lookups = await Promise.all(
+    candidates.map((inviteCode) =>
+      ctx.db
+        .query("watchparties")
+        .withIndex("by_inviteCode", (q) => q.eq("inviteCode", inviteCode))
+        .unique(),
+    ),
+  );
+
+  const available = candidates.find((_, index) => !lookups[index]);
+  if (available) {
+    return available;
   }
+
   throw new Error("Invite-Code konnte nicht erzeugt werden");
 }
 
@@ -193,17 +198,17 @@ export const getMySession = query({
       return null;
     }
 
+    const watchparty = await ctx.db.get(session.watchpartyId);
+    if (!watchparty) {
+      return null;
+    }
+
     const member = await requireMember(ctx, {
       sessionId: session._id,
       token: session.token,
       userId: session.userId,
       watchpartyId: session.watchpartyId,
     });
-
-    const watchparty = await ctx.db.get(session.watchpartyId);
-    if (!watchparty) {
-      return null;
-    }
 
     return {
       watchpartyId: session.watchpartyId,
@@ -316,6 +321,6 @@ export const getWatchpartyAggregate = query({
 
     return [...totals.entries()]
       .map(([songId, totalPoints]) => ({ songId, totalPoints }))
-      .sort((a, b) => b.totalPoints - a.totalPoints);
+      .toSorted((a, b) => b.totalPoints - a.totalPoints);
   },
 });

@@ -1,5 +1,5 @@
 import { Copy, X } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useEffect } from "react";
 import { cn } from "../lib/cn";
 import { controlButtonBase, controlButtonIdle } from "../lib/ui";
@@ -10,7 +10,7 @@ type WatchpartyOverlayProps = {
   children: React.ReactNode;
 };
 
-export function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverlayProps) {
+function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverlayProps) {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -22,7 +22,7 @@ export function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverla
   }, [onClose]);
 
   return (
-    <motion.div
+    <m.div
       className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/55 p-3 min-[680px]:items-center"
       role="presentation"
       initial={{ opacity: 0 }}
@@ -30,7 +30,7 @@ export function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverla
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
-      <motion.div
+      <m.div
         role="dialog"
         aria-modal="true"
         aria-labelledby="watchparty-overlay-title"
@@ -42,7 +42,7 @@ export function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverla
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 id="watchparty-overlay-title" className="m-0 text-lg font-extrabold text-foreground">
+          <h2 id="watchparty-overlay-title" className="m-0 text-lg font-semibold text-foreground">
             {title}
           </h2>
           <button
@@ -55,8 +55,8 @@ export function WatchpartyOverlay({ title, onClose, children }: WatchpartyOverla
           </button>
         </div>
         {children}
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -125,7 +125,6 @@ export function JoinNameOverlay({
         onChange={(event) => onDisplayNameChange(event.target.value)}
         placeholder="Name eingeben"
         autoComplete="nickname"
-        autoFocus
       />
       {error ? <p className="m-0 mb-3 text-sm text-emphasis">{error}</p> : null}
       <button
@@ -161,7 +160,7 @@ export function LeaveWatchpartyOverlay({ onConfirm, onClose, isLeaving = false }
       <p className="m-0 mb-4 text-sm text-secondary-foreground">
         Du verlässt die gemeinsame Wertung. Deine Punkte bleiben lokal auf diesem Gerät gespeichert.
       </p>
-      <motion.div
+      <m.div
         className="flex flex-col gap-2 min-[480px]:flex-row"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,7 +187,7 @@ export function LeaveWatchpartyOverlay({ onConfirm, onClose, isLeaving = false }
         >
           {isLeaving ? "Wird verlassen…" : "Verlassen"}
         </button>
-      </motion.div>
+      </m.div>
     </WatchpartyOverlay>
   );
 }

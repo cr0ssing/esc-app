@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
+import { AnimatePresence, m, type HTMLMotionProps } from "motion/react";
 import { cn } from "../lib/cn";
 
 type SparkleParticle = {
@@ -26,7 +26,7 @@ const RED_SPARKLE_COLORS = [
   "#ffc2cf",
 ] as const;
 
-export type SparkleVariant = "golden" | "red";
+type SparkleVariant = "golden" | "red";
 
 const SPARKLE_PALETTES: Record<SparkleVariant, readonly string[]> = {
   golden: GOLDEN_SPARKLE_COLORS,
@@ -77,7 +77,7 @@ export function SparkleButton({
     }, 780);
   }, [sparkleVariant]);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const triggerSparkleBurst = (event: React.MouseEvent<HTMLButtonElement>) => {
     burst();
     onClick?.(event);
   };
@@ -85,7 +85,7 @@ export function SparkleButton({
   const sparkleLayer =
     burstOrigin && particles.length > 0
       ? createPortal(
-        <motion.div
+        <m.div
           className="pointer-events-none fixed inset-0 z-50 overflow-hidden"
           aria-hidden="true"
           initial={false}
@@ -101,7 +101,7 @@ export function SparkleButton({
                 const half = particle.size / 2;
 
                 return (
-                  <motion.span
+                  <m.span
                     key={particle.id}
                     className={cn(
                       "pointer-events-none absolute left-0 top-0 rounded-full",
@@ -113,7 +113,7 @@ export function SparkleButton({
                       background: particle.color,
                       boxShadow: `0 0 ${particle.size * 4}px ${particle.color}, 0 0 ${particle.size * 1.5}px #fff`,
                     }}
-                    initial={{ opacity: 1, scale: 0, rotate: 0, x: -half, y: -half }}
+                    initial={{ opacity: 0, scale: 0.95, rotate: 0, x: -half, y: -half }}
                     animate={{
                       opacity: 0,
                       scale: 1.35,
@@ -128,14 +128,14 @@ export function SparkleButton({
               })}
             </AnimatePresence>
           </span>
-        </motion.div>,
+        </m.div>,
         document.body,
       )
       : null;
 
   return (
     <>
-      <motion.button
+      <m.button
         ref={buttonRef}
         className={cn(
           "relative isolate",
@@ -143,10 +143,10 @@ export function SparkleButton({
           className,
         )}
         {...props}
-        onClick={handleClick}
+        onClick={triggerSparkleBurst}
       >
         {children}
-      </motion.button>
+      </m.button>
       {sparkleLayer}
     </>
   );

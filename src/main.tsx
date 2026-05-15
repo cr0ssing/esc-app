@@ -3,6 +3,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { App } from "./App";
+import { MotionProvider } from "./components/MotionProvider";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 if (!convexUrl) {
@@ -14,7 +15,9 @@ const convex = new ConvexReactClient(convexUrl);
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ConvexProvider client={convex}>
-      <App />
+      <MotionProvider>
+        <App />
+      </MotionProvider>
     </ConvexProvider>
   </React.StrictMode>,
 );
