@@ -113,7 +113,7 @@ export function SparkleButton({
                       background: particle.color,
                       boxShadow: `0 0 ${particle.size * 4}px ${particle.color}, 0 0 ${particle.size * 1.5}px #fff`,
                     }}
-                    initial={{ opacity: 0, scale: 0.95, rotate: 0, x: -half, y: -half }}
+                    initial={{ opacity: 1, scale: 0, rotate: 0, x: -half, y: -half }}
                     animate={{
                       opacity: 0,
                       scale: 1.35,

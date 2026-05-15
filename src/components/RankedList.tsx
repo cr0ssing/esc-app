@@ -10,12 +10,42 @@ import { SongCard } from "./SongCard";
 type RankedListProps = {
   songs: Song[];
   state: VoteState;
+  dragEnabled: boolean;
   onReorder: (ids: string[]) => void;
   onPatch: (patch: Partial<VoteState>) => void;
   onPointsChange: (songId: string, points: number | null) => void;
 };
 
-export function RankedList({ songs, state, onReorder, onPatch, onPointsChange }: RankedListProps) {
+export function RankedList({ songs, state, dragEnabled, onReorder, onPatch, onPointsChange }: RankedListProps) {
+  if (!dragEnabled) {
+    return (
+      <m.div className="grid gap-3">
+        {songs.map((song, index) => (
+          <RankedSong
+            key={song.id}
+            song={song}
+            rank={index + 1}
+            state={state}
+            onPatch={onPatch}
+            onPointsChange={onPointsChange}
+          />
+        ))}
+      </m.div>
+    );
+  }
+
+  return <SortableRankedList songs={songs} state={state} onReorder={onReorder} onPatch={onPatch} onPointsChange={onPointsChange} />;
+}
+
+type SortableRankedListProps = {
+  songs: Song[];
+  state: VoteState;
+  onReorder: (ids: string[]) => void;
+  onPatch: (patch: Partial<VoteState>) => void;
+  onPointsChange: (songId: string, points: number | null) => void;
+};
+
+function SortableRankedList({ songs, state, onReorder, onPatch, onPointsChange }: SortableRankedListProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const isSorting = activeId !== null;
   const sensors = useSensors(
@@ -64,13 +94,34 @@ export function RankedList({ songs, state, onReorder, onPatch, onPointsChange }:
   );
 }
 
-type SortableSongProps = {
+type RankedSongProps = {
   song: Song;
   rank: number;
   state: VoteState;
-  isSorting: boolean;
   onPatch: (patch: Partial<VoteState>) => void;
   onPointsChange: (songId: string, points: number | null) => void;
+};
+
+function RankedSong({ song, rank, state, onPatch, onPointsChange }: RankedSongProps) {
+  return (
+    <SongCard
+      song={song}
+      rank={rank}
+      variant="ranking"
+      points={state.pointsBySongId[song.id] ?? null}
+      note={state.notesBySongId[song.id] ?? ""}
+      isWinnerPrediction={state.winnerPredictionId === song.id}
+      isPersonalPick={state.personalPickId === song.id}
+      onPointsChange={(points) => onPointsChange(song.id, points)}
+      onNoteChange={(note) => onPatch({ notesBySongId: { ...state.notesBySongId, [song.id]: note } })}
+      onWinnerPredictionChange={() => onPatch({ winnerPredictionId: state.winnerPredictionId === song.id ? null : song.id })}
+      onPersonalPickChange={() => onPatch({ personalPickId: state.personalPickId === song.id ? null : song.id })}
+    />
+  );
+}
+
+type SortableSongProps = RankedSongProps & {
+  isSorting: boolean;
 };
 
 function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }: SortableSongProps) {

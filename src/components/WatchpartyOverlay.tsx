@@ -154,6 +154,46 @@ type LeaveWatchpartyOverlayProps = {
   isLeaving?: boolean;
 };
 
+type ReorderByPointsOverlayProps = {
+  onConfirm: () => void;
+  onClose: () => void;
+};
+
+export function ReorderByPointsOverlay({ onConfirm, onClose }: ReorderByPointsOverlayProps) {
+  return (
+    <WatchpartyOverlay title="Nach Punkten sortieren?" onClose={onClose}>
+      <p className="m-0 mb-4 text-sm text-secondary-foreground">
+        Deine manuelle Reihenfolge wird durch die Punkte ersetzt.
+      </p>
+      <m.div
+        className="flex flex-col gap-2 min-[480px]:flex-row"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <button
+          type="button"
+          className={cn(controlButtonBase, controlButtonIdle, "min-h-11 flex-1")}
+          onClick={onClose}
+        >
+          Abbrechen
+        </button>
+        <button
+          type="button"
+          className={cn(
+            controlButtonBase,
+            "min-h-11 flex-1 border border-emphasis/55 bg-emphasis/12 text-emphasis",
+            "hover:-translate-y-px hover:border-emphasis hover:bg-emphasis/22",
+          )}
+          onClick={onConfirm}
+        >
+          Sortieren
+        </button>
+      </m.div>
+    </WatchpartyOverlay>
+  );
+}
+
 export function LeaveWatchpartyOverlay({ onConfirm, onClose, isLeaving = false }: LeaveWatchpartyOverlayProps) {
   return (
     <WatchpartyOverlay title="Watchparty verlassen?" onClose={onClose}>

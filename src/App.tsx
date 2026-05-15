@@ -1,4 +1,4 @@
-import { ArrowUpDown, LogOut, Share2 } from "lucide-react";
+import { ArrowUpDown, GripVertical, LogOut, Share2 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import rawSongs from "./data/songs.json";
@@ -8,12 +8,12 @@ import { createPointsOrder, getRankedSongs, placeSongByPoints } from "./lib/rank
 import { buildInviteUrl, getPartyCodeFromUrl } from "./lib/invite";
 import { loadVoteState, saveVoteState } from "./lib/storage";
 import { cn } from "./lib/cn";
-import { controlButtonBase, controlButtonIdle, headerControlButtonClass, headerMetricClass } from "./lib/ui";
+import { controlButtonActive, controlButtonBase, controlButtonIdle, headerControlButtonClass, headerMetricClass } from "./lib/ui";
 import { RankedList } from "./components/RankedList";
 import { SongCard } from "./components/SongCard";
 import { ViewTabs } from "./components/ViewTabs";
 import { WatchpartyTab } from "./components/WatchpartyTab";
-import { InviteLinkOverlay, LeaveWatchpartyOverlay } from "./components/WatchpartyOverlay";
+import { InviteLinkOverlay, LeaveWatchpartyOverlay, ReorderByPointsOverlay } from "./components/WatchpartyOverlay";
 import type { Song, ViewMode, VoteState } from "./types";
 
 const songs = rawSongs as Song[];
@@ -61,12 +61,14 @@ function watchpartyChromeReducer(
 }
 
 export function App() {
-  const [view, setView] = useState<ViewMode>("show");
+  const [explicitView, setExplicitView] = useState<ViewMode | null>(null);
   const [state, setState] = useState<VoteState>(() => loadVoteState(songs));
   const [watchpartyChrome, dispatchWatchpartyChrome] = useReducer(
     watchpartyChromeReducer,
     initialWatchpartyChrome,
   );
+  const [showReorderConfirm, setShowReorderConfirm] = useState(false);
+  const [rankingDragEnabled, setRankingDragEnabled] = useState(false);
   const initialPartyCode = useMemo(() => getPartyCodeFromUrl(), []);
 
   const {
@@ -80,11 +82,10 @@ export function App() {
     persistSession,
   } = useWatchpartySession();
 
-  useEffect(() => {
-    if (initialPartyCode && !isActive && !isLoading) {
-      setView("watchparty");
-    }
-  }, [initialPartyCode, isActive, isLoading]);
+  const defaultView: ViewMode =
+    initialPartyCode && !isActive && !isLoading ? "watchparty" : "show";
+  const view = explicitView ?? defaultView;
+  const setView = setExplicitView;
 
   useEffect(() => {
     if (!isActive) {
@@ -181,7 +182,14 @@ export function App() {
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
-          <RankedList songs={rankedSongs} state={state} onPatch={patchState} onPointsChange={setSongPoints} onReorder={(ids) => patchState({ manualRankOrder: ids })} />
+          <RankedList
+            songs={rankedSongs}
+            state={state}
+            dragEnabled={rankingDragEnabled}
+            onPatch={patchState}
+            onPointsChange={setSongPoints}
+            onReorder={(ids) => patchState({ manualRankOrder: ids })}
+          />
         </m.section>
       );
     }
@@ -191,7 +199,7 @@ export function App() {
         <m.section
           key="watchparty"
           aria-label="Watchparty"
-          className={!isActive ? "flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1" : undefined}
+          className={!isActive ? "flex min-h-0 flex-1 flex-col *:min-h-0 *:flex-1" : undefined}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
@@ -270,16 +278,31 @@ export function App() {
             </>
           ) : null}
           {view === "ranking" ? (
-            <button
-              type="button"
-              className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
-              aria-label="Nach Punkten sortieren"
-              onClick={() => patchState({ manualRankOrder: createPointsOrder(songs, state.pointsBySongId) })}
-            >
-              <ArrowUpDown size={18} aria-hidden="true" />
-            </button>
+            <>
+              <button
+                type="button"
+                className={cn(
+                  controlButtonBase,
+                  rankingDragEnabled ? controlButtonActive : controlButtonIdle,
+                  headerControlButtonClass,
+                )}
+                aria-label={rankingDragEnabled ? "Verschieben deaktivieren" : "Verschieben aktivieren"}
+                aria-pressed={rankingDragEnabled}
+                onClick={() => setRankingDragEnabled((enabled) => !enabled)}
+              >
+                <GripVertical size={18} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
+                aria-label="Nach Punkten sortieren"
+                onClick={() => setShowReorderConfirm(true)}
+              >
+                <ArrowUpDown size={18} aria-hidden="true" />
+              </button>
+            </>
           ) : null}
-          {view !== "watchparty" ? (
+          {view === "show" ? (
             <div className={headerMetricClass}>
               {Object.values(state.pointsBySongId).filter((points) => points !== null).length}/25
             </div>
@@ -325,6 +348,16 @@ export function App() {
             void leaveWatchparty().finally(() => {
               dispatchWatchpartyChrome({ type: "finishLeaving" });
             });
+          }}
+        />
+      ) : null}
+
+      {showReorderConfirm ? (
+        <ReorderByPointsOverlay
+          onClose={() => setShowReorderConfirm(false)}
+          onConfirm={() => {
+            patchState({ manualRankOrder: createPointsOrder(songs, state.pointsBySongId) });
+            setShowReorderConfirm(false);
           }}
         />
       ) : null}
