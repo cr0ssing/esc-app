@@ -23,6 +23,7 @@ export function PointsPicker({ value, onChange }: PointsPickerProps) {
         const selected = value === points;
         return (
           <SparkleButton
+            sparkleVariant="golden"
             whileTap={{ scale: 0.86 }}
             className={cn(
               pointsButtonBase,

@@ -135,6 +135,7 @@ export function SongCard({
           </div>
           <div className="-mr-1.5 flex shrink-0 justify-start gap-0">
             <SparkleButton
+              sparkleVariant="golden"
               whileTap={{ scale: 0.9, rotate: -5 }}
               className={winnerIconClasses(isWinnerPrediction)}
               type="button"
@@ -151,6 +152,7 @@ export function SongCard({
               />
             </SparkleButton>
             <SparkleButton
+              sparkleVariant="red"
               whileTap={{ scale: 0.9, rotate: 5 }}
               className={favoriteIconClasses(isPersonalPick)}
               type="button"
