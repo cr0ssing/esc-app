@@ -125,7 +125,7 @@ export function App() {
           {view === "ranking" ? (
             <button
               type="button"
-              className={cn(controlButtonBase, controlButtonIdle, "min-h-[42px] min-w-[42px] shrink-0 p-0")}
+              className={cn(controlButtonBase, controlButtonIdle, "min-w-[42px] shrink-0 p-0")}
               aria-label="Nach Punkten sortieren"
               onClick={() => patchState({ manualRankOrder: createPointsOrder(songs, state.pointsBySongId) })}
             >
