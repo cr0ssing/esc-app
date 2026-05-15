@@ -6,14 +6,14 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-ARG VITE_CONVEX_URL=http://127.0.0.1:3210
-ENV VITE_CONVEX_URL=$VITE_CONVEX_URL
-
 COPY . .
 RUN pnpm build
 
 FROM nginx:1.27-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY scripts/resolve-convex-url.sh /usr/local/bin/resolve-convex-url.sh
+COPY scripts/app-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/resolve-convex-url.sh /docker-entrypoint.sh
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

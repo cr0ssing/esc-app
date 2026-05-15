@@ -45,7 +45,7 @@ pnpm build
 docker compose up --build
 ```
 
-Die App läuft auf `http://localhost:8080`, Convex auf `http://localhost:3210`. Der Browser muss die Convex-URL unter `VITE_CONVEX_URL` erreichen können (Standard: `http://127.0.0.1:3210`).
+Die App läuft auf `http://localhost:8080`, Convex auf `http://localhost:3210`. Die App-Container-URL wird zur Laufzeit über `CONVEX_URL` gesetzt (Standard in `docker-compose.yml`: `http://127.0.0.1:3210`). Lokal mit `pnpm dev` weiterhin `VITE_CONVEX_URL` in `.env.local`.
 
 ### Convex deploy (production, one-shot)
 

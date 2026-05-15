@@ -9,7 +9,8 @@ RUN pnpm install --frozen-lockfile
 
 COPY convex ./convex
 
+COPY scripts/resolve-convex-url.sh /usr/local/bin/resolve-convex-url.sh
 COPY scripts/convex-deploy-entrypoint.sh /usr/local/bin/convex-deploy-entrypoint.sh
-RUN chmod +x /usr/local/bin/convex-deploy-entrypoint.sh
+RUN chmod +x /usr/local/bin/resolve-convex-url.sh /usr/local/bin/convex-deploy-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/convex-deploy-entrypoint.sh"]

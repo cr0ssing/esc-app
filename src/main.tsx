@@ -4,11 +4,9 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { App } from "./App";
 import { MotionProvider } from "./components/MotionProvider";
+import { getConvexUrl } from "./lib/convexUrl";
 
-const convexUrl = import.meta.env.VITE_CONVEX_URL;
-if (!convexUrl) {
-  throw new Error("VITE_CONVEX_URL is not set");
-}
+const convexUrl = getConvexUrl();
 
 const convex = new ConvexReactClient(convexUrl);
 
