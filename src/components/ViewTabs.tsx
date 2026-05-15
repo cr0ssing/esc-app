@@ -1,4 +1,4 @@
-import { ListMusic, Trophy } from "lucide-react";
+import { ListMusic, PartyPopper, Trophy } from "lucide-react";
 import { cn } from "../lib/cn";
 import { controlButtonActive, controlButtonBase, controlButtonIdle } from "../lib/ui";
 import type { ViewMode } from "../types";
@@ -8,12 +8,15 @@ type ViewTabsProps = {
   onChange: (value: Exclude<ViewMode, "credits">) => void;
 };
 
-const tabButtonBase = cn(controlButtonBase, "min-h-[58px] border-0 text-[0.84rem] font-extrabold uppercase");
+const tabButtonBase = cn(
+  controlButtonBase,
+  "min-h-[58px] flex-col gap-1 border-0 py-2 text-[0.76rem] font-extrabold uppercase leading-tight",
+);
 
 export function ViewTabs({ value, onChange }: ViewTabsProps) {
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-10 mx-auto grid w-full grid-cols-2 gap-px border-0 border-t border-border-accent bg-muted shadow-elevated"
+      className="fixed inset-x-0 bottom-0 z-10 mx-auto grid w-full grid-cols-3 gap-px border-0 border-t border-border-accent bg-muted shadow-elevated"
       aria-label="Ansicht"
     >
       <button
@@ -33,6 +36,15 @@ export function ViewTabs({ value, onChange }: ViewTabsProps) {
       >
         <Trophy size={17} aria-hidden="true" />
         <span>Ranking</span>
+      </button>
+      <button
+        className={cn(tabButtonBase, value === "watchparty" ? controlButtonActive : controlButtonIdle)}
+        type="button"
+        aria-pressed={value === "watchparty"}
+        onClick={() => onChange("watchparty")}
+      >
+        <PartyPopper size={18} aria-hidden="true" />
+        <span>Watchparty</span>
       </button>
     </div>
   );

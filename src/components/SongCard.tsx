@@ -5,10 +5,11 @@ import { cn } from "../lib/cn";
 import { getFlagUrl } from "../lib/flags";
 import { participantLinkClass } from "../lib/ui";
 import type { Song } from "../types";
+import { AnimatedMetric } from "./AnimatedMetric";
 import { PointsPicker } from "./PointsPicker";
 import { SparkleButton } from "./SparkleButton";
 
-type SongCardVariant = "show" | "ranking";
+type SongCardVariant = "show" | "ranking" | "watchparty";
 
 type SongCardProps = {
   song: Song;
@@ -19,6 +20,7 @@ type SongCardProps = {
   rank?: number;
   layout?: boolean;
   variant?: SongCardVariant;
+  readOnly?: boolean;
   isSortable?: boolean;
   onPointsChange: (points: number | null) => void;
   onNoteChange: (note: string) => void;
@@ -51,6 +53,13 @@ type ParticipantLinkProps = {
   children: ReactNode;
 };
 
+function formatPointsLabel(points: number | null, withSuffix: boolean): string {
+  if (points === null) {
+    return "–";
+  }
+  return withSuffix ? `${points} Punkte` : String(points);
+}
+
 function ParticipantLink({ song, className, ariaLabel, onPointerDown, children }: ParticipantLinkProps) {
   return (
     <a
@@ -75,6 +84,7 @@ export function SongCard({
   rank,
   layout = true,
   variant = "show",
+  readOnly = false,
   isSortable = false,
   onPointsChange,
   onNoteChange,
@@ -83,6 +93,14 @@ export function SongCard({
 }: SongCardProps) {
   const flagUrl = getFlagUrl(song.countryCode);
   const linkImage = variant === "show";
+  const showVoteControls = !readOnly && variant !== "watchparty";
+  const showNoteReadOnly = readOnly && variant !== "watchparty" && note.trim().length > 0;
+  const showBadges = variant !== "watchparty";
+  const showLargePoints = variant === "watchparty" || (readOnly && variant === "ranking");
+  const showPointsSuffix = variant === "watchparty" || (readOnly && variant === "ranking");
+  const animateWatchpartyMetrics = variant === "watchparty";
+  const pointsLabel = formatPointsLabel(points, showPointsSuffix);
+  const rankLabel = rank ? `#${rank}` : song.runningOrder.toString().padStart(2, "0");
   const stopSortDrag = isSortable
     ? (event: PointerEvent) => {
       event.stopPropagation();
@@ -122,7 +140,11 @@ export function SongCard({
       <div className="grid min-w-0 gap-2 p-3 min-[680px]:p-4">
         <div className="flex min-w-0 items-center justify-between gap-[7px] text-xs font-extrabold uppercase text-muted-foreground">
           <div className="flex min-w-0 items-center gap-[7px]">
-            <span>{rank ? `#${rank}` : song.runningOrder.toString().padStart(2, "0")}</span>
+            {animateWatchpartyMetrics ? (
+              <AnimatedMetric value={rankLabel} emphasis="default" />
+            ) : (
+              <span>{rankLabel}</span>
+            )}
             {flagUrl ? (
               <img
                 className="h-[13.5px] w-[18px] border border-accent-faint object-cover"
@@ -133,42 +155,46 @@ export function SongCard({
             ) : null}
             <span className="truncate">{song.countryDe}</span>
           </div>
-          <div className="-mr-1.5 flex shrink-0 justify-start gap-0">
-            <SparkleButton
-              sparkleVariant="golden"
-              whileTap={{ scale: 0.9, rotate: -5 }}
-              className={winnerIconClasses(isWinnerPrediction)}
-              type="button"
-              onClick={onWinnerPredictionChange}
-              onPointerDown={stopSortDrag}
-              aria-label="Sieger"
-              aria-pressed={isWinnerPrediction}
-            >
-              <Trophy
-                size={18}
-                aria-hidden="true"
-                fill={isWinnerPrediction ? "currentColor" : "none"}
-                strokeWidth={isWinnerPrediction ? 1.75 : 2}
-              />
-            </SparkleButton>
-            <SparkleButton
-              sparkleVariant="red"
-              whileTap={{ scale: 0.9, rotate: 5 }}
-              className={favoriteIconClasses(isPersonalPick)}
-              type="button"
-              onClick={onPersonalPickChange}
-              onPointerDown={stopSortDrag}
-              aria-label="Favorit"
-              aria-pressed={isPersonalPick}
-            >
-              <Heart
-                size={18}
-                aria-hidden="true"
-                fill={isPersonalPick ? "currentColor" : "none"}
-                strokeWidth={isPersonalPick ? 1.75 : 2}
-              />
-            </SparkleButton>
-          </div>
+          {showBadges ? (
+            <motion.div className="-mr-1.5 flex shrink-0 justify-start gap-0">
+              <SparkleButton
+                sparkleVariant="golden"
+                whileTap={{ scale: 0.9, rotate: -5 }}
+                className={winnerIconClasses(isWinnerPrediction)}
+                type="button"
+                onClick={onWinnerPredictionChange}
+                onPointerDown={stopSortDrag}
+                aria-label="Sieger"
+                aria-pressed={isWinnerPrediction}
+                disabled={readOnly}
+              >
+                <Trophy
+                  size={18}
+                  aria-hidden="true"
+                  fill={isWinnerPrediction ? "currentColor" : "none"}
+                  strokeWidth={isWinnerPrediction ? 1.75 : 2}
+                />
+              </SparkleButton>
+              <SparkleButton
+                sparkleVariant="red"
+                whileTap={{ scale: 0.9, rotate: 5 }}
+                className={favoriteIconClasses(isPersonalPick)}
+                type="button"
+                onClick={onPersonalPickChange}
+                onPointerDown={stopSortDrag}
+                aria-label="Favorit"
+                aria-pressed={isPersonalPick}
+                disabled={readOnly}
+              >
+                <Heart
+                  size={18}
+                  aria-hidden="true"
+                  fill={isPersonalPick ? "currentColor" : "none"}
+                  strokeWidth={isPersonalPick ? 1.75 : 2}
+                />
+              </SparkleButton>
+            </motion.div>
+          ) : null}
         </div>
 
         <div className="-mt-1 flex min-w-0 flex-col items-start">
@@ -192,18 +218,35 @@ export function SongCard({
           </ParticipantLink>
         </div>
 
-        <div onPointerDown={stopSortDrag}>
-          <PointsPicker value={points} onChange={onPointsChange} />
-        </div>
+        {showLargePoints ? (
+          <p className="m-0 text-[2.4rem] leading-none font-extrabold tabular-nums text-foreground">
+            {animateWatchpartyMetrics ? (
+              <AnimatedMetric value={pointsLabel} emphasis="highlight" />
+            ) : (
+              pointsLabel
+            )}
+          </p>
+        ) : showVoteControls ? (
+          <motion.div onPointerDown={stopSortDrag}>
+            <PointsPicker value={points} onChange={onPointsChange} />
+          </motion.div>
+        ) : (
+          <p className="m-0 text-xl font-extrabold tabular-nums text-foreground">{pointsLabel}</p>
+        )}
 
-        <input
-          className="m-0 box-border h-7 w-full min-w-0 rounded-none border-0 bg-input/45 px-2 text-sm text-foreground-subtle placeholder:text-placeholder outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/70"
-          aria-label={`Notiz zu ${song.artist}`}
-          value={note}
-          onChange={(event) => onNoteChange(event.target.value)}
-          onPointerDown={stopSortDrag}
-          placeholder="Notiz hinzufügen"
-        />
+        {showVoteControls ? (
+          <input
+            className="m-0 box-border h-7 w-full min-w-0 rounded-none border-0 bg-input/45 px-2 text-sm text-foreground-subtle placeholder:text-placeholder outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/70"
+            aria-label={`Notiz zu ${song.artist}`}
+            value={note}
+            onChange={(event) => onNoteChange(event.target.value)}
+            onPointerDown={stopSortDrag}
+            placeholder="Notiz hinzufügen"
+            readOnly={readOnly}
+          />
+        ) : showNoteReadOnly ? (
+          <p className="m-0 line-clamp-2 text-sm leading-snug text-foreground-subtle">{note}</p>
+        ) : null}
       </div>
     </motion.article>
   );

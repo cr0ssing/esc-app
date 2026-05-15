@@ -1,11 +1,33 @@
 # ESC 2026
 
-Mobile-first Web-App für persönliche Eurovision-Wertungen.
+Mobile-first Web-App für persönliche Eurovision-Wertungen mit Watchparty-Funktion.
 
 ## Entwicklung
 
 ```bash
 pnpm install
+cp .env.example .env.local
+```
+
+### Self-hosted Convex (Watchparty)
+
+```bash
+docker compose up -d convex
+docker compose exec convex ./generate_admin_key.sh
+```
+
+Trage den Admin-Key in `.env.local` ein:
+
+```bash
+VITE_CONVEX_URL=http://127.0.0.1:3210
+CONVEX_SELF_HOSTED_URL=http://127.0.0.1:3210
+CONVEX_SELF_HOSTED_ADMIN_KEY=<admin-key>
+```
+
+Convex-Funktionen deployen und Frontend starten:
+
+```bash
+pnpm exec convex deploy
 pnpm dev
 ```
 
@@ -23,7 +45,7 @@ pnpm build
 docker compose up --build
 ```
 
-Die App läuft dann auf `http://localhost:8080`.
+Die App läuft auf `http://localhost:8080`, Convex auf `http://localhost:3210`. Der Browser muss die Convex-URL unter `VITE_CONVEX_URL` erreichen können (Standard: `http://127.0.0.1:3210`).
 
 ## Daten
 
@@ -33,6 +55,9 @@ https://www.eurovision.com/stories/running-order-eurovision-2026-grand-final-vie
 Künstlerdaten und Bilder stammen von den offiziellen Teilnehmerprofilen:
 https://www.eurovision.com/eurovision-song-contest/vienna-2026/all-participants/
 
-## Später
+## Watchparty
 
-`spotifyUrl` ist im Song-Typ vorbereitet. `docker-compose.yml` enthält ein profil-gesteuertes Convex-Backend als Platzhalter für Watchparty-Funktionen.
+- Tab **Watchparty** mit Smile-Icon: Watchparty erstellen oder per Einladungslink beitreten
+- Session-Token im Cookie `esc_session` (serverseitig validiert, kein User-ID-Spoofing)
+- Live-Sync der persönlichen Wertung mit Convex
+- Gesamtranking (Summe aller Punkte) und Drill-down in einzelne Wertungen per Avatar

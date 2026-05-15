@@ -1,13 +1,15 @@
 services:
   esc-app:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_CONVEX_URL: http://127.0.0.1:3210
     image: esc-app:local
     ports:
       - "8080:80"
 
   convex:
     image: ghcr.io/get-convex/convex-backend:latest
-    profiles: ["future-watchparty"]
     environment:
       CONVEX_INSTANCE_NAME: esc-2026
       CONVEX_CLOUD_ORIGIN: http://localhost:3210

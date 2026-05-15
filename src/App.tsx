@@ -1,14 +1,19 @@
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, LogOut, Share2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import rawSongs from "./data/songs.json";
+import { useVoteSync } from "./hooks/useVoteSync";
+import { useWatchpartySession } from "./hooks/useWatchpartySession";
 import { createPointsOrder, getRankedSongs, placeSongByPoints } from "./lib/ranking";
+import { buildInviteUrl, getPartyCodeFromUrl } from "./lib/invite";
 import { loadVoteState, saveVoteState } from "./lib/storage";
 import { cn } from "./lib/cn";
-import { controlButtonBase, controlButtonIdle } from "./lib/ui";
+import { controlButtonBase, controlButtonIdle, headerControlButtonClass, headerMetricClass } from "./lib/ui";
 import { RankedList } from "./components/RankedList";
 import { SongCard } from "./components/SongCard";
 import { ViewTabs } from "./components/ViewTabs";
+import { WatchpartyTab } from "./components/WatchpartyTab";
+import { InviteLinkOverlay } from "./components/WatchpartyOverlay";
 import type { Song, ViewMode, VoteState } from "./types";
 
 const songs = rawSongs as Song[];
@@ -16,7 +21,30 @@ const songs = rawSongs as Song[];
 export function App() {
   const [view, setView] = useState<ViewMode>("show");
   const [state, setState] = useState<VoteState>(() => loadVoteState(songs));
+  const [showInviteOverlay, setShowInviteOverlay] = useState(false);
+  const initialPartyCode = useMemo(() => getPartyCodeFromUrl(), []);
+
+  const {
+    sessionToken,
+    session,
+    isActive,
+    isLoading,
+    createWatchparty,
+    joinWatchparty,
+    leaveWatchparty,
+    persistSession,
+  } = useWatchpartySession();
+
+  useEffect(() => {
+    if (initialPartyCode && !isActive && !isLoading) {
+      setView("watchparty");
+    }
+  }, [initialPartyCode, isActive, isLoading]);
+
+  useVoteSync({ sessionToken, isActive, state, setState });
+
   const rankedSongs = useMemo(() => getRankedSongs(songs, state), [state]);
+  const inviteUrl = session ? buildInviteUrl(session.inviteCode) : null;
 
   useEffect(() => {
     saveVoteState(state);
@@ -37,6 +65,27 @@ export function App() {
     });
   }
 
+  async function handleCreateWatchparty(args: { displayName: string; initialVoteState: VoteState }) {
+    return await createWatchparty({
+      sessionToken: sessionToken ?? undefined,
+      displayName: args.displayName,
+      initialVoteState: args.initialVoteState,
+    });
+  }
+
+  async function handleJoinWatchparty(args: {
+    inviteInput: string;
+    displayName: string;
+    initialVoteState: VoteState;
+  }) {
+    return await joinWatchparty({
+      sessionToken: sessionToken ?? undefined,
+      inviteInput: args.inviteInput,
+      displayName: args.displayName,
+      initialVoteState: args.initialVoteState,
+    });
+  }
+
   function contentForView() {
     if (view === "credits") {
       return (
@@ -52,7 +101,7 @@ export function App() {
             <p className="m-0 mb-1 text-xs font-extrabold uppercase text-muted-foreground">Credits</p>
             <h2 className="m-0 text-[1.7rem] font-extrabold text-foreground">Bildnachweise</h2>
           </div>
-          <div className="grid gap-2">
+          <motion.div className="grid gap-2">
             {songs.map((song) => (
               <a
                 key={song.id}
@@ -66,7 +115,7 @@ export function App() {
                 <small className="text-xs text-secondary-foreground">{song.imageCredit ?? "Eurovision Song Contest"}</small>
               </a>
             ))}
-          </div>
+          </motion.div>
         </motion.section>
       );
     }
@@ -82,6 +131,32 @@ export function App() {
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
           <RankedList songs={rankedSongs} state={state} onPatch={patchState} onPointsChange={setSongPoints} onReorder={(ids) => patchState({ manualRankOrder: ids })} />
+        </motion.section>
+      );
+    }
+
+    if (view === "watchparty") {
+      return (
+        <motion.section
+          key="watchparty"
+          aria-label="Watchparty"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <WatchpartyTab
+            songs={songs}
+            voteState={state}
+            sessionToken={sessionToken}
+            session={session}
+            isActive={isActive}
+            isLoading={isLoading}
+            initialPartyCode={initialPartyCode}
+            onPersistSession={persistSession}
+            onCreate={handleCreateWatchparty}
+            onJoin={handleJoinWatchparty}
+          />
         </motion.section>
       );
     }
@@ -122,35 +197,66 @@ export function App() {
           <h1 className="m-0 text-[clamp(2rem,10vw,4.8rem)] leading-[0.9] font-extrabold text-foreground">ESC 2026</h1>
         </div>
         <div className="flex items-stretch gap-2">
+          {view === "watchparty" && isActive && inviteUrl ? (
+            <>
+              <button
+                type="button"
+                className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
+                aria-label="Einladungslink teilen"
+                onClick={() => setShowInviteOverlay(true)}
+              >
+                <Share2 size={18} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
+                aria-label="Watchparty verlassen"
+                onClick={() => {
+                  setShowInviteOverlay(false);
+                  void leaveWatchparty();
+                }}
+              >
+                <LogOut size={18} aria-hidden="true" />
+              </button>
+            </>
+          ) : null}
           {view === "ranking" ? (
             <button
               type="button"
-              className={cn(controlButtonBase, controlButtonIdle, "min-w-[42px] shrink-0 p-0")}
+              className={cn(controlButtonBase, controlButtonIdle, headerControlButtonClass)}
               aria-label="Nach Punkten sortieren"
               onClick={() => patchState({ manualRankOrder: createPointsOrder(songs, state.pointsBySongId) })}
             >
               <ArrowUpDown size={18} aria-hidden="true" />
             </button>
           ) : null}
-          <div className="min-w-16 border border-border-accent bg-raised px-2.5 py-2 text-center text-[0.85rem] font-extrabold text-foreground-subtle">
-            {Object.values(state.pointsBySongId).filter((points) => points !== null).length}/25
-          </div>
+          {view !== "watchparty" ? (
+            <div className={headerMetricClass}>
+              {Object.values(state.pointsBySongId).filter((points) => points !== null).length}/25
+            </div>
+          ) : null}
         </div>
       </header>
 
       <AnimatePresence mode="wait">{contentForView()}</AnimatePresence>
 
-      <footer className="flex justify-center px-0 py-[26px] pb-1">
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent text-xs font-extrabold text-muted-foreground underline underline-offset-4"
-          onClick={() => setView(view === "credits" ? "show" : "credits")}
-        >
-          {view === "credits" ? "Zurück" : "Bildnachweise"}
-        </button>
-      </footer>
+      {view === "watchparty" && !isActive ? null : (
+        <footer className="flex justify-center px-0 py-[26px] pb-1">
+          <button
+            type="button"
+            className="cursor-pointer border-0 bg-transparent text-xs font-extrabold text-muted-foreground underline underline-offset-4"
+            onClick={() => setView(view === "credits" ? "show" : "credits")}
+          >
+            {view === "credits" ? "Zurück" : "Bildnachweise"}
+          </button>
+        </footer>
+      )}
 
       <ViewTabs value={view === "credits" ? "show" : view} onChange={setView} />
+
+      {showInviteOverlay && inviteUrl ? (
+        <InviteLinkOverlay inviteUrl={inviteUrl} onClose={() => setShowInviteOverlay(false)} />
+      ) : null}
     </main>
   );
 }

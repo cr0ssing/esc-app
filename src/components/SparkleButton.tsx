@@ -1,4 +1,5 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 import { cn } from "../lib/cn";
 
@@ -44,10 +45,20 @@ export function SparkleButton({
   sparkleVariant = "golden",
   ...props
 }: SparkleButtonProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [particles, setParticles] = useState<SparkleParticle[]>([]);
+  const [burstOrigin, setBurstOrigin] = useState<{ x: number; y: number } | null>(null);
   const [bursting, setBursting] = useState(false);
 
   const burst = useCallback(() => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) {
+      setBurstOrigin({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+
     const palette = SPARKLE_PALETTES[sparkleVariant];
     const next = Array.from({ length: 14 }, (_, index) => ({
       id: Date.now() + index + Math.random(),
@@ -61,6 +72,7 @@ export function SparkleButton({
     setParticles(next);
     window.setTimeout(() => {
       setParticles([]);
+      setBurstOrigin(null);
       setBursting(false);
     }, 780);
   }, [sparkleVariant]);
@@ -70,52 +82,72 @@ export function SparkleButton({
     onClick?.(event);
   };
 
-  return (
-    <motion.button
-      className={cn(
-        "relative isolate overflow-visible",
-        bursting && "is-bursting z-1 translate-z-0",
-        className,
-      )}
-      {...props}
-      onClick={handleClick}
-    >
-      <span className="pointer-events-none absolute left-1/2 top-1/2 z-2 size-0 overflow-visible" aria-hidden="true">
-        <AnimatePresence>
-          {particles.map((particle) => {
-            const offsetX = Math.cos(particle.angle) * particle.distance;
-            const offsetY = Math.sin(particle.angle) * particle.distance;
-            const half = particle.size / 2;
+  const sparkleLayer =
+    burstOrigin && particles.length > 0
+      ? createPortal(
+        <motion.div
+          className="pointer-events-none fixed inset-0 z-50 overflow-hidden"
+          aria-hidden="true"
+          initial={false}
+        >
+          <span
+            className="absolute size-0"
+            style={{ left: burstOrigin.x, top: burstOrigin.y }}
+          >
+            <AnimatePresence>
+              {particles.map((particle) => {
+                const offsetX = Math.cos(particle.angle) * particle.distance;
+                const offsetY = Math.sin(particle.angle) * particle.distance;
+                const half = particle.size / 2;
 
-            return (
-              <motion.span
-                key={particle.id}
-                className={cn(
-                  "pointer-events-none absolute left-0 top-0 rounded-full",
-                  particle.shape === "star" && "rounded-[1px]",
-                )}
-                style={{
-                  width: particle.size,
-                  height: particle.size,
-                  background: particle.color,
-                  boxShadow: `0 0 ${particle.size * 4}px ${particle.color}, 0 0 ${particle.size * 1.5}px #fff`,
-                }}
-                initial={{ opacity: 1, scale: 0, rotate: 0, x: -half, y: -half }}
-                animate={{
-                  opacity: 0,
-                  scale: 1.35,
-                  rotate: particle.shape === "star" ? 160 : 0,
-                  x: offsetX - half,
-                  y: offsetY - half,
-                }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-              />
-            );
-          })}
-        </AnimatePresence>
-      </span>
-      {children}
-    </motion.button>
+                return (
+                  <motion.span
+                    key={particle.id}
+                    className={cn(
+                      "pointer-events-none absolute left-0 top-0 rounded-full",
+                      particle.shape === "star" && "rounded-[1px]",
+                    )}
+                    style={{
+                      width: particle.size,
+                      height: particle.size,
+                      background: particle.color,
+                      boxShadow: `0 0 ${particle.size * 4}px ${particle.color}, 0 0 ${particle.size * 1.5}px #fff`,
+                    }}
+                    initial={{ opacity: 1, scale: 0, rotate: 0, x: -half, y: -half }}
+                    animate={{
+                      opacity: 0,
+                      scale: 1.35,
+                      rotate: particle.shape === "star" ? 160 : 0,
+                      x: offsetX - half,
+                      y: offsetY - half,
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                );
+              })}
+            </AnimatePresence>
+          </span>
+        </motion.div>,
+        document.body,
+      )
+      : null;
+
+  return (
+    <>
+      <motion.button
+        ref={buttonRef}
+        className={cn(
+          "relative isolate",
+          bursting && "is-bursting z-1 translate-z-0",
+          className,
+        )}
+        {...props}
+        onClick={handleClick}
+      >
+        {children}
+      </motion.button>
+      {sparkleLayer}
+    </>
   );
 }

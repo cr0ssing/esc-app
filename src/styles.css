@@ -57,6 +57,7 @@
 
 html {
   min-height: 100%;
+  overflow-x: clip;
   background: var(--color-background);
 }
 
@@ -72,11 +73,39 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  overflow-x: clip;
 }
 
 button,
 input {
   font: inherit;
+}
+
+.scrollbar-overlay {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-overlay.is-scrolling {
+  scrollbar-color: color-mix(in srgb, var(--color-muted-foreground) 55%, transparent) transparent;
+}
+
+.scrollbar-overlay::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-overlay.is-scrolling::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-muted-foreground) 55%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

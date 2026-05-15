@@ -6,6 +6,9 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+ARG VITE_CONVEX_URL=http://127.0.0.1:3210
+ENV VITE_CONVEX_URL=$VITE_CONVEX_URL
+
 COPY . .
 RUN pnpm build
 
