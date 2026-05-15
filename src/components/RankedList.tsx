@@ -1,9 +1,9 @@
 import { closestCenter, DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { cn } from "../lib/cn";
 import type { Song, VoteState } from "../types";
 import { SongCard } from "./SongCard";
 
@@ -46,7 +46,7 @@ export function RankedList({ songs, state, onReorder, onPatch, onPointsChange }:
       }}
     >
       <SortableContext items={songs.map((song) => song.id)} strategy={verticalListSortingStrategy}>
-        <motion.div className="song-list">
+        <motion.div className="grid gap-3">
           {songs.map((song, index) => (
             <SortableSong
               key={song.id}
@@ -81,14 +81,24 @@ function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }:
   };
 
   return (
-    <motion.div ref={setNodeRef} style={style} layout={!isSorting} className={isDragging ? "sortable-row is-dragging" : "sortable-row"}>
-      <motion.button whileTap={{ scale: 0.92 }} className="drag-handle" type="button" aria-label={`${song.artist} verschieben`} {...attributes} {...listeners}>
-        <GripVertical size={18} aria-hidden="true" />
-      </motion.button>
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      layout={!isSorting}
+      className={cn(
+        "cursor-grab touch-none active:cursor-grabbing",
+        isDragging && "relative z-20 opacity-92 saturate-[1.2]",
+      )}
+      aria-label={`${song.artist} verschieben`}
+      {...attributes}
+      {...listeners}
+    >
       <SongCard
         song={song}
         rank={rank}
         layout={!isSorting}
+        variant="ranking"
+        isSortable
         points={state.pointsBySongId[song.id] ?? null}
         note={state.notesBySongId[song.id] ?? ""}
         isWinnerPrediction={state.winnerPredictionId === song.id}

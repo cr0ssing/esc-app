@@ -1,7 +1,6 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
-
-type SparkleVariant = "default" | "winner" | "favorite";
+import { cn } from "../lib/cn";
 
 type SparkleParticle = {
   id: number;
@@ -12,21 +11,20 @@ type SparkleParticle = {
   shape: "dot" | "star";
 };
 
-const SPARKLE_COLORS: Record<SparkleVariant, string[]> = {
-  default: ["#ffe066", "#f2c94c", "#fff3bf", "#ffffff"],
-  winner: ["#ffe066", "#f2c94c", "#fff3bf", "#ffffff"],
-  favorite: ["#ffe066", "#f2c94c", "#fff3bf", "#ffffff"],
-};
+const SPARKLE_COLORS = [
+  "var(--color-highlight-bright)",
+  "var(--color-highlight)",
+  "var(--color-highlight-subtle)",
+  "var(--color-foreground)",
+] as const;
 
 type SparkleButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
-  sparkleVariant?: SparkleVariant;
   children?: ReactNode;
 };
 
 export function SparkleButton({
   children,
   onClick,
-  sparkleVariant = "default",
   className,
   ...props
 }: SparkleButtonProps) {
@@ -34,13 +32,12 @@ export function SparkleButton({
   const [bursting, setBursting] = useState(false);
 
   const burst = useCallback(() => {
-    const colors = SPARKLE_COLORS[sparkleVariant];
     const next = Array.from({ length: 10 }, (_, index) => ({
       id: Date.now() + index + Math.random(),
       angle: (index / 10) * Math.PI * 2 + (Math.random() - 0.5) * 0.6,
       distance: 12 + Math.random() * 20,
       size: 2.5 + Math.random() * 3.5,
-      color: colors[index % colors.length] ?? colors[0],
+      color: SPARKLE_COLORS[index % SPARKLE_COLORS.length] ?? SPARKLE_COLORS[0],
       shape: index % 3 === 0 ? ("star" as const) : ("dot" as const),
     }));
     setBursting(true);
@@ -49,18 +46,24 @@ export function SparkleButton({
       setParticles([]);
       setBursting(false);
     }, 520);
-  }, [sparkleVariant]);
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     burst();
     onClick?.(event);
   };
 
-  const mergedClassName = ["sparkle-button", bursting && "is-bursting", className].filter(Boolean).join(" ");
-
   return (
-    <motion.button className={mergedClassName} {...props} onClick={handleClick}>
-      <span className="sparkle-burst" aria-hidden="true">
+    <motion.button
+      className={cn(
+        "relative isolate overflow-visible",
+        bursting && "is-bursting z-1 translate-z-0",
+        className,
+      )}
+      {...props}
+      onClick={handleClick}
+    >
+      <span className="pointer-events-none absolute left-1/2 top-1/2 z-2 size-0 overflow-visible" aria-hidden="true">
         <AnimatePresence>
           {particles.map((particle) => {
             const offsetX = Math.cos(particle.angle) * particle.distance;
@@ -70,7 +73,10 @@ export function SparkleButton({
             return (
               <motion.span
                 key={particle.id}
-                className={particle.shape === "star" ? "sparkle-particle is-star" : "sparkle-particle"}
+                className={cn(
+                  "pointer-events-none absolute left-0 top-0 rounded-full",
+                  particle.shape === "star" && "rounded-[1px]",
+                )}
                 style={{
                   width: particle.size,
                   height: particle.size,
