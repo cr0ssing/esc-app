@@ -157,16 +157,27 @@ export function SongCard({
       )}
 
       <div className="grid min-w-0 gap-1 p-3 min-[680px]:p-4">
-        <div className="flex min-w-0 items-center justify-between text-xs font-extrabold uppercase text-muted-foreground">
-          <div className="min-w-0">
+        <div className="grid min-w-0 grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] gap-x-[7px] gap-y-1 min-[500px]:grid-rows-1 text-xs font-extrabold uppercase text-muted-foreground">
+          <div className="col-start-1 row-start-1 self-center">
             {animateWatchpartyMetrics ? (
               <AnimatedMetric value={rankLabel} emphasis="default" />
             ) : (
               <span>{rankLabel}</span>
             )}
           </div>
+          <div className="col-span-3 row-start-2 flex min-w-0 items-center gap-[7px] min-[500px]:col-span-1 min-[500px]:col-start-2 min-[500px]:row-start-1">
+            {flagUrl ? (
+              <img
+                className="h-[13.5px] w-[18px] shrink-0 border border-accent-faint object-cover"
+                src={flagUrl}
+                alt=""
+                aria-hidden="true"
+              />
+            ) : null}
+            <span className="truncate">{song.countryDe}</span>
+          </div>
           {showBadges ? (
-            <m.div className="-mr-1.5 flex shrink-0 justify-start gap-0">
+            <m.div className="col-start-3 row-start-1 -mr-1.5 flex shrink-0 justify-self-end self-center gap-0">
               <SparkleButton
                 sparkleVariant="golden"
                 whileTap={{ scale: 0.9, rotate: -5 }}
@@ -207,18 +218,7 @@ export function SongCard({
           ) : null}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-1 items-start pb-0.5">
-          <div className="pb-0.5 flex min-w-0 items-center gap-[7px] text-xs font-extrabold uppercase text-muted-foreground">
-            {flagUrl ? (
-              <img
-                className="h-[13.5px] w-[18px] shrink-0 border border-accent-faint object-cover"
-                src={flagUrl}
-                alt=""
-                aria-hidden="true"
-              />
-            ) : null}
-            <span className="truncate">{song.countryDe}</span>
-          </div>
+        <div className="flex min-w-0 flex-col gap-1 items-start">
           <ParticipantLink
             song={song}
             className="max-w-full"
