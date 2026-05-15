@@ -268,7 +268,7 @@ export function App() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[820px] flex-col px-3 pb-[calc(104px+var(--pwa-tab-bar-extra-bottom))] pt-[calc(var(--pwa-main-padding-top-base)+env(safe-area-inset-top,0))] min-[680px]:px-[18px]">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[820px] flex-col px-3 pb-[calc(58px+var(--pwa-tab-bar-extra-bottom)+var(--pwa-view-tabs-padding-bottom))] pt-[calc(var(--pwa-main-padding-top-base)+env(safe-area-inset-top,0))] min-[680px]:px-[18px]">
       <header className="flex items-end justify-between gap-[18px] px-0.5 pb-[18px] pt-3">
         <div>
           <p className="m-0 mb-1 text-[0.76rem] font-bold tracking-[0.08em] uppercase text-muted-foreground">Vienna · 16.05.2026</p>

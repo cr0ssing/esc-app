@@ -218,7 +218,7 @@ export function SongCard({
           ) : null}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-1 items-start">
+        <div className="flex min-w-0 flex-col gap-.5 items-start">
           <ParticipantLink
             song={song}
             className="max-w-full"

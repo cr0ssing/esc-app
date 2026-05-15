@@ -15,7 +15,7 @@ const tabActiveChrome =
 
 const tabButtonBase = cn(
   "inline-flex cursor-pointer items-center justify-center gap-[7px] transition-colors duration-150 ease-out-quint focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-2",
-  "min-h-[58px] flex-col gap-1 border-0 py-2 text-[0.76rem] font-extrabold leading-tight",
+  "min-h-[58px] flex-col gap-1 border-0 py-2 text-[0.65rem] font-extrabold leading-tight pb-[var(--pwa-view-tabs-padding-bottom)]",
 );
 
 function tabButtonClass(isActive: boolean) {

@@ -55,6 +55,7 @@
   -webkit-font-smoothing: antialiased;
   --pwa-tab-bar-extra-bottom: 0px;
   --pwa-main-padding-top-base: 18px;
+  --pwa-view-tabs-padding-bottom: .3rem;
 }
 
 /*
@@ -64,6 +65,7 @@
 :root[data-standalone-pwa] {
   --pwa-tab-bar-extra-bottom: max(1.25rem, env(safe-area-inset-bottom, 0));
   --pwa-main-padding-top-base: 0px;
+  --pwa-view-tabs-padding-bottom: .75rem;
 }
 
 html {
@@ -87,9 +89,27 @@ body {
   overflow-x: clip;
 }
 
-button,
-input {
-  font: inherit;
+/*
+ * Must live in @layer base so Tailwind utilities (e.g. text-*) on buttons/inputs win.
+ * Unlayered `font: inherit` Otherwise beats layered utilities and ignores text-[…] classes.
+ */
+@layer base {
+  button,
+  input {
+    font: inherit;
+  }
+}
+
+/*
+ * iOS Safari (and some Android browsers) auto-zoom focused fields when font-size < 16px.
+ * Unlayered so this beats Tailwind `text-*` utilities on small viewports (aligned with min-[680px]).
+ */
+@media (max-width: 679.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 .scrollbar-overlay {

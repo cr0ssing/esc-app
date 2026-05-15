@@ -180,11 +180,7 @@ export function ReorderByPointsOverlay({ onConfirm, onClose }: ReorderByPointsOv
         </button>
         <button
           type="button"
-          className={cn(
-            controlButtonBase,
-            "min-h-11 flex-1 border border-green-500/55 bg-green-600/18 text-green-200",
-            "hover:-translate-y-px hover:border-green-400/80 hover:bg-green-600/28",
-          )}
+          className={cn(controlButtonBase, controlButtonIdle, "min-h-11 flex-1")}
           onClick={onConfirm}
         >
           Sortieren
