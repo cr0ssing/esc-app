@@ -1,0 +1,22 @@
+services:
+  esc-app:
+    build: .
+    image: esc-app:local
+    ports:
+      - "8080:80"
+
+  convex:
+    image: ghcr.io/get-convex/convex-backend:latest
+    profiles: ["future-watchparty"]
+    environment:
+      CONVEX_INSTANCE_NAME: esc-2026
+      CONVEX_CLOUD_ORIGIN: http://localhost:3210
+      CONVEX_SITE_ORIGIN: http://localhost:3211
+    ports:
+      - "3210:3210"
+      - "3211:3211"
+    volumes:
+      - convex-data:/convex/data
+
+volumes:
+  convex-data:
