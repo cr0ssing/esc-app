@@ -74,7 +74,9 @@ type SortableSongProps = {
 };
 
 function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }: SortableSongProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: song.id });
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: song.id,
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? undefined : transition,
@@ -85,13 +87,7 @@ function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }:
       ref={setNodeRef}
       style={style}
       layout={!isSorting}
-      className={cn(
-        "cursor-grab touch-none active:cursor-grabbing",
-        isDragging && "relative z-20 opacity-92 saturate-[1.2]",
-      )}
-      aria-label={`${song.artist} verschieben`}
-      {...attributes}
-      {...listeners}
+      className={cn(isDragging && "relative z-20 opacity-92 saturate-[1.2]")}
     >
       <SongCard
         song={song}
@@ -99,6 +95,9 @@ function SortableSong({ song, rank, state, isSorting, onPatch, onPointsChange }:
         layout={!isSorting}
         variant="ranking"
         isSortable
+        sortableAttributes={attributes}
+        sortableListeners={listeners}
+        sortableActivatorRef={setActivatorNodeRef}
         points={state.pointsBySongId[song.id] ?? null}
         note={state.notesBySongId[song.id] ?? ""}
         isWinnerPrediction={state.winnerPredictionId === song.id}

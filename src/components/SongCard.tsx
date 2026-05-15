@@ -1,3 +1,5 @@
+import type { DraggableAttributes } from "@dnd-kit/core";
+import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { Heart, Trophy } from "lucide-react";
 import { m } from "motion/react";
 import type { PointerEvent, ReactNode } from "react";
@@ -22,6 +24,9 @@ type SongCardProps = {
   variant?: SongCardVariant;
   readOnly?: boolean;
   isSortable?: boolean;
+  sortableAttributes?: DraggableAttributes;
+  sortableListeners?: SyntheticListenerMap;
+  sortableActivatorRef?: (element: HTMLElement | null) => void;
   onPointsChange: (points: number | null) => void;
   onNoteChange: (note: string) => void;
   onWinnerPredictionChange: () => void;
@@ -86,6 +91,9 @@ export function SongCard({
   variant = "show",
   readOnly = false,
   isSortable = false,
+  sortableAttributes,
+  sortableListeners,
+  sortableActivatorRef,
   onPointsChange,
   onNoteChange,
   onWinnerPredictionChange,
@@ -134,26 +142,28 @@ export function SongCard({
           {image}
         </ParticipantLink>
       ) : (
-        <div className="relative overflow-hidden border-r border-border bg-sunken">{image}</div>
+        <div
+          ref={isSortable ? sortableActivatorRef : undefined}
+          className={cn(
+            "relative overflow-hidden border-r border-border bg-sunken",
+            isSortable && "cursor-grab touch-none active:cursor-grabbing",
+          )}
+          aria-label={isSortable ? `${song.artist} verschieben` : undefined}
+          {...(isSortable ? sortableAttributes : {})}
+          {...(isSortable ? sortableListeners : {})}
+        >
+          {image}
+        </div>
       )}
 
-      <div className="grid min-w-0 gap-2 p-3 min-[680px]:p-4">
-        <div className="flex min-w-0 items-center justify-between gap-[7px] text-xs font-extrabold uppercase text-muted-foreground">
-          <div className="flex min-w-0 items-center gap-[7px]">
+      <div className="grid min-w-0 gap-1 p-3 min-[680px]:p-4">
+        <div className="flex min-w-0 items-center justify-between text-xs font-extrabold uppercase text-muted-foreground">
+          <div className="min-w-0">
             {animateWatchpartyMetrics ? (
               <AnimatedMetric value={rankLabel} emphasis="default" />
             ) : (
               <span>{rankLabel}</span>
             )}
-            {flagUrl ? (
-              <img
-                className="h-[13.5px] w-[18px] border border-accent-faint object-cover"
-                src={flagUrl}
-                alt=""
-                aria-hidden="true"
-              />
-            ) : null}
-            <span className="truncate">{song.countryDe}</span>
           </div>
           {showBadges ? (
             <m.div className="-mr-1.5 flex shrink-0 justify-start gap-0">
@@ -197,24 +207,35 @@ export function SongCard({
           ) : null}
         </div>
 
-        <div className="-mt-1 flex min-w-0 flex-col items-start">
-          <ParticipantLink
-            song={song}
-            className="max-w-full"
-            ariaLabel={`${song.artist} bei Eurovision öffnen`}
-            onPointerDown={stopSortDrag}
-          >
-            <h2 className="m-0 inline text-[1.08rem] leading-[1.05] font-semibold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
-              {song.artist}
-            </h2>
-          </ParticipantLink>
+        <div className="flex min-w-0 flex-col gap-1 items-start pb-0.5">
+          <div className="pb-0.5 flex min-w-0 items-center gap-[7px] text-xs font-extrabold uppercase text-muted-foreground">
+            {flagUrl ? (
+              <img
+                className="h-[13.5px] w-[18px] shrink-0 border border-accent-faint object-cover"
+                src={flagUrl}
+                alt=""
+                aria-hidden="true"
+              />
+            ) : null}
+            <span className="truncate">{song.countryDe}</span>
+          </div>
           <ParticipantLink
             song={song}
             className="max-w-full"
             ariaLabel={`${song.title} bei Eurovision öffnen`}
             onPointerDown={stopSortDrag}
           >
-            <p className="m-0 inline text-[0.9rem] leading-tight text-foreground-subtle break-anywhere">{song.title}</p>
+            <h2 className="m-0 inline text-[1.08rem] leading-[1.05] font-semibold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
+              {song.title}
+            </h2>
+          </ParticipantLink>
+          <ParticipantLink
+            song={song}
+            className="max-w-full"
+            ariaLabel={`${song.artist} bei Eurovision öffnen`}
+            onPointerDown={stopSortDrag}
+          >
+            <p className="m-0 inline text-[0.9rem] leading-tight text-foreground-subtle break-anywhere">{song.artist}</p>
           </ParticipantLink>
         </div>
 
