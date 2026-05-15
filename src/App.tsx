@@ -1,6 +1,7 @@
 import { ArrowUpDown, GripVertical, LogOut, Share2 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useReducer, useState } from "react";
+import { getCookieConsent } from "./lib/cookieConsent";
 import rawSongs from "./data/songs.json";
 import { useVoteSync } from "./hooks/useVoteSync";
 import { useWatchpartySession } from "./hooks/useWatchpartySession";
@@ -13,6 +14,10 @@ import { RankedList } from "./components/RankedList";
 import { SongCard } from "./components/SongCard";
 import { ViewTabs } from "./components/ViewTabs";
 import { WatchpartyTab } from "./components/WatchpartyTab";
+import { CookieBanner } from "./components/CookieBanner";
+import { DatenschutzView } from "./components/DatenschutzView";
+import { ImpressumView } from "./components/ImpressumView";
+import { LegalFooter } from "./components/LegalFooter";
 import { InviteLinkOverlay, LeaveWatchpartyOverlay, ReorderByPointsOverlay } from "./components/WatchpartyOverlay";
 import type { Song, ViewMode, VoteState } from "./types";
 
@@ -69,6 +74,7 @@ export function App() {
   );
   const [showReorderConfirm, setShowReorderConfirm] = useState(false);
   const [rankingDragEnabled, setRankingDragEnabled] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(() => getCookieConsent() === null);
   const initialPartyCode = useMemo(() => getPartyCodeFromUrl(), []);
 
   const {
@@ -138,7 +144,19 @@ export function App() {
     });
   }
 
+  function openDatenschutz() {
+    setExplicitView("datenschutz");
+  }
+
   function contentForView() {
+    if (view === "impressum") {
+      return <ImpressumView key="impressum" />;
+    }
+
+    if (view === "datenschutz") {
+      return <DatenschutzView key="datenschutz" />;
+    }
+
     if (view === "credits") {
       return (
         <m.section
@@ -315,18 +333,23 @@ export function App() {
       </div>
 
       {view === "watchparty" && !isActive ? null : (
-        <footer className="flex justify-center px-0 py-[26px] pb-1">
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent text-xs font-extrabold text-muted-foreground underline underline-offset-4"
-            onClick={() => setView(view === "credits" ? "show" : "credits")}
-          >
-            {view === "credits" ? "Zurück" : "Bildnachweise"}
-          </button>
-        </footer>
+        <LegalFooter
+          view={view}
+          onNavigate={setView}
+          onReopenCookies={() => setShowCookieBanner(true)}
+        />
       )}
 
-      <ViewTabs value={view === "credits" ? "show" : view} onChange={setView} />
+      <ViewTabs
+        value={view === "credits" || view === "impressum" || view === "datenschutz" ? "show" : view}
+        onChange={setView}
+      />
+
+      <CookieBanner
+        visible={showCookieBanner}
+        onClose={() => setShowCookieBanner(false)}
+        onOpenDatenschutz={openDatenschutz}
+      />
 
       {watchpartyChrome.showInviteOverlay && inviteUrl ? (
         <InviteLinkOverlay

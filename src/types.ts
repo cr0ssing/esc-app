@@ -23,4 +23,4 @@ export type VoteState = {
   manualRankOrder: string[];
 };
 
-export type ViewMode = "show" | "ranking" | "watchparty" | "credits";
+export type ViewMode = "show" | "ranking" | "watchparty" | "credits" | "impressum" | "datenschutz";

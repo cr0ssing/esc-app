@@ -5,6 +5,12 @@ services:
     image: esc-app:local
     environment:
       CONVEX_URL: http://127.0.0.1:3210
+      # Impressum (set for production; optional for local Docker)
+      # IMPRESS_NAME: ""
+      # IMPRESS_ADDRESS: |
+      #   Straße 1
+      #   12345 Ort
+      # IMPRESS_EMAIL: ""
     ports:
       - "8080:80"
 

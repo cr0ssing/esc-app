@@ -2,6 +2,8 @@
   "name": "esc-app",
   "private": true,
   "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/cr0ssing/esc-app",
   "type": "module",
   "scripts": {
     "dev": "vite",

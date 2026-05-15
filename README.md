@@ -2,6 +2,8 @@
 
 Mobile-first Web-App für persönliche Eurovision-Wertungen mit Watchparty-Funktion.
 
+Lizenz: [GNU Affero General Public License v3.0 or later](LICENSE). Quellcode: <https://github.com/cr0ssing/esc-app>.
+
 ## Entwicklung
 
 ```bash
@@ -46,6 +48,14 @@ docker compose up --build
 ```
 
 Die App läuft auf `http://localhost:8080`, Convex auf `http://localhost:3210`. Die App-Container-URL wird zur Laufzeit über `CONVEX_URL` gesetzt (Standard in `docker-compose.yml`: `http://127.0.0.1:3210`). Lokal mit `pnpm dev` weiterhin `VITE_CONVEX_URL` in `.env.local`.
+
+Impressum-Angaben (Name, Anschrift, E-Mail) werden nicht ins Repository eingecheckt. Im Container setzt du zur Laufzeit:
+
+- `IMPRESS_NAME`
+- `IMPRESS_ADDRESS` (mehrzeilig möglich, z. B. mit YAML `|` in Compose)
+- `IMPRESS_EMAIL`
+
+Lokal mit `pnpm dev`: `VITE_IMPRESS_NAME`, `VITE_IMPRESS_ADDRESS`, `VITE_IMPRESS_EMAIL` in `.env.local` (in `VITE_IMPRESS_ADDRESS` kann `\n` für Zeilenumbrüche stehen).
 
 ### Convex deploy (production, one-shot)
 
