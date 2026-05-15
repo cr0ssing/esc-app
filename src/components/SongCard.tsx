@@ -119,7 +119,7 @@ export function SongCard({
         <div className="relative overflow-hidden border-r border-border bg-sunken">{image}</div>
       )}
 
-      <div className="grid min-w-0 gap-[11px] p-3 min-[680px]:p-4">
+      <div className="grid min-w-0 gap-2 p-3 min-[680px]:p-4">
         <div className="flex min-w-0 items-center justify-between gap-[7px] text-xs font-extrabold uppercase text-muted-foreground">
           <div className="flex min-w-0 items-center gap-[7px]">
             <span>{rank ? `#${rank}` : song.runningOrder.toString().padStart(2, "0")}</span>
@@ -171,39 +171,39 @@ export function SongCard({
           </div>
         </div>
 
-        <div className="min-w-0">
+        <div className="-mt-1 flex min-w-0 flex-col items-start">
           <ParticipantLink
             song={song}
-            className="block"
+            className="max-w-full"
             ariaLabel={`${song.artist} bei Eurovision öffnen`}
             onPointerDown={stopSortDrag}
           >
-            <h2 className="m-0 text-[1.08rem] leading-[1.05] font-extrabold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
+            <h2 className="m-0 inline text-[1.08rem] leading-[1.05] font-extrabold text-foreground break-anywhere min-[680px]:text-[1.28rem]">
               {song.artist}
             </h2>
           </ParticipantLink>
           <ParticipantLink
             song={song}
-            className="mt-1 block"
+            className="max-w-full"
             ariaLabel={`${song.title} bei Eurovision öffnen`}
             onPointerDown={stopSortDrag}
           >
-            <p className="m-0 text-[0.9rem] leading-tight text-foreground-subtle break-anywhere">{song.title}</p>
+            <p className="m-0 inline text-[0.9rem] leading-tight text-foreground-subtle break-anywhere">{song.title}</p>
           </ParticipantLink>
         </div>
 
+        <div onPointerDown={stopSortDrag}>
+          <PointsPicker value={points} onChange={onPointsChange} />
+        </div>
+
         <input
-          className="h-9 w-full min-w-0 rounded-none border border-border-accent bg-input px-2.5 text-foreground placeholder:text-placeholder focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-2"
+          className="m-0 box-border h-7 w-full min-w-0 rounded-none border-0 bg-input/45 px-2 text-sm text-foreground-subtle placeholder:text-placeholder outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/70"
           aria-label={`Notiz zu ${song.artist}`}
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
           onPointerDown={stopSortDrag}
           placeholder="Notiz hinzufügen"
         />
-
-        <div onPointerDown={stopSortDrag}>
-          <PointsPicker value={points} onChange={onPointsChange} />
-        </div>
       </div>
     </motion.article>
   );
