@@ -221,7 +221,10 @@ export function App() {
         <m.section
           key="watchparty"
           aria-label="Watchparty"
-          className={!isActive ? "flex min-h-0 flex-1 flex-col *:min-h-0 *:flex-1" : undefined}
+          className={cn(
+            "min-w-0",
+            !isActive && "flex min-h-0 flex-1 flex-col *:min-h-0 *:flex-1",
+          )}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
@@ -334,7 +337,7 @@ export function App() {
         </div>
       </header>
 
-      <div className={cn("min-h-0", view === "watchparty" && !isActive && "flex flex-1 flex-col")}>
+      <div className={cn("min-h-0 min-w-0", view === "watchparty" && !isActive && "flex flex-1 flex-col")}>
         <AnimatePresence mode="wait">{contentForView()}</AnimatePresence>
       </div>
 

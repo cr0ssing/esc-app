@@ -286,7 +286,7 @@ export function WatchpartyTab({
       : null;
 
   return (
-    <m.div className="grid gap-4">
+    <m.div className="grid min-w-0 gap-4">
       {overlay === "create" && createdInviteUrl ? (
         <InviteLinkOverlay inviteUrl={createdInviteUrl} onClose={() => dispatch({ type: "setOverlay", value: "none" })} />
       ) : null}
