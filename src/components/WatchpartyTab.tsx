@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "convex/react";
 import { m } from "motion/react";
 import { useEffect, useReducer, useRef } from "react";
 import { api } from "../../convex/_generated/api";
+import type { WatchpartyMember } from "../hooks/useWatchpartyMembers";
 import { cn } from "../lib/cn";
 import { buildInviteUrl, clearPartyCodeFromUrl } from "../lib/invite";
 import { createDefaultVoteState } from "../lib/storage";
@@ -25,6 +26,8 @@ type WatchpartyTabProps = {
   voteState: VoteState;
   sessionToken: string | null;
   session: SessionInfo | null;
+  members: WatchpartyMember[] | undefined;
+  memberVotePulses: Record<string, number>;
   isActive: boolean;
   isLoading: boolean;
   initialPartyCode: string | null;
@@ -96,6 +99,8 @@ export function WatchpartyTab({
   voteState,
   sessionToken,
   session,
+  members,
+  memberVotePulses,
   isActive,
   isLoading,
   initialPartyCode,
@@ -117,7 +122,6 @@ export function WatchpartyTab({
 
   const { displayName, overlay, inviteInput, createdInviteUrl, selectedUserId, busy, error } = ui;
 
-  const members = useQuery(api.watchparties.getWatchpartyMembers, isActive && sessionToken ? { sessionToken } : "skip");
   const memberVoteState = useQuery(
     api.watchparties.getMemberVoteState,
     isActive && sessionToken && selectedUserId ? { sessionToken, targetUserId: selectedUserId } : "skip",
@@ -289,6 +293,7 @@ export function WatchpartyTab({
 
       <WatchpartyMemberBar
         members={members ?? []}
+        memberVotePulses={memberVotePulses}
         currentUserId={session.userId}
         selectedMember={selectedMember ?? null}
         onSelectMember={(userId) => dispatch({ type: "setSelectedUserId", value: userId })}

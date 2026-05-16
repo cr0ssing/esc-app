@@ -10,7 +10,7 @@ import {
   requireMember,
   requireSession,
 } from "./lib/session";
-import { emptyVoteState, voteStateValidator, type VoteStateValue } from "./lib/voteState";
+import { emptyVoteState, voteActivityToken, voteStateValidator, type VoteStateValue } from "./lib/voteState";
 
 const sessionTokenArg = v.string();
 
@@ -30,6 +30,8 @@ const createJoinResultValidator = v.object({
 const memberSummaryValidator = v.object({
   userId: v.string(),
   displayName: v.string(),
+  updatedAt: v.number(),
+  voteSignature: v.string(),
 });
 
 const aggregateEntryValidator = v.object({
@@ -271,6 +273,8 @@ export const getWatchpartyMembers = query({
     return members.map((m) => ({
       userId: m.userId,
       displayName: m.displayName,
+      updatedAt: m.updatedAt,
+      voteSignature: voteActivityToken(m.voteState),
     }));
   },
 });

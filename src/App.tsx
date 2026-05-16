@@ -3,6 +3,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { getCookieConsent } from "./lib/cookieConsent";
 import rawSongs from "./data/songs.json";
+import { useMemberVotePulses, useWatchpartyMembers } from "./hooks/useWatchpartyMembers";
 import { useVoteSync } from "./hooks/useVoteSync";
 import { useWatchpartySession } from "./hooks/useWatchpartySession";
 import { createPointsOrder, getRankedSongs, placeSongByPoints } from "./lib/ranking";
@@ -100,6 +101,9 @@ export function App() {
   }, [isActive]);
 
   useVoteSync({ sessionToken, isActive, state, setState });
+
+  const watchpartyMembers = useWatchpartyMembers(sessionToken, isActive);
+  const memberVotePulses = useMemberVotePulses(watchpartyMembers);
 
   const rankedSongs = useMemo(() => getRankedSongs(songs, state), [state]);
   const inviteUrl = session ? buildInviteUrl(session.inviteCode) : null;
@@ -228,6 +232,8 @@ export function App() {
             voteState={state}
             sessionToken={sessionToken}
             session={session}
+            members={watchpartyMembers}
+            memberVotePulses={memberVotePulses}
             isActive={isActive}
             isLoading={isLoading}
             initialPartyCode={initialPartyCode}

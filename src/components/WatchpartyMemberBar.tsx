@@ -1,17 +1,14 @@
 import { ChevronLeft } from "lucide-react";
 import { AnimatePresence, LayoutGroup, m } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { WatchpartyMember } from "../hooks/useWatchpartyMembers";
 import { cn } from "../lib/cn";
 import { getAvatarUrl } from "../lib/avatar";
 import { controlButtonBase, controlButtonIdle } from "../lib/ui";
 
-type WatchpartyMember = {
-  userId: string;
-  displayName: string;
-};
-
 type WatchpartyMemberBarProps = {
   members: WatchpartyMember[];
+  memberVotePulses: Record<string, number>;
   currentUserId: string | null;
   selectedMember: WatchpartyMember | null;
   onSelectMember: (userId: string) => void;
@@ -20,24 +17,35 @@ type WatchpartyMemberBarProps = {
 
 function MemberAvatar({
   userId,
+  pulseGeneration,
   highlighted = false,
   layoutId,
 }: {
   userId: string;
+  pulseGeneration: number;
   highlighted?: boolean;
   layoutId: string;
 }) {
   return (
-    <m.img
+    <m.div
       layoutId={layoutId}
-      src={getAvatarUrl(userId)}
-      alt=""
-      className={cn(
-        "size-14 rounded-full border-2 border-border bg-sunken object-cover",
-        highlighted && "border-accent",
-      )}
+      className="relative grid size-16 shrink-0 place-items-center"
       transition={{ type: "spring", stiffness: 420, damping: 36 }}
-    />
+    >
+      <div
+        key={pulseGeneration}
+        className={cn("size-14 rounded-full", pulseGeneration > 0 && "avatar-vote-pulse-ring")}
+      >
+        <img
+          src={getAvatarUrl(userId)}
+          alt=""
+          className={cn(
+            "size-full rounded-full border-2 border-border bg-sunken object-cover",
+            highlighted && "border-accent",
+          )}
+        />
+      </div>
+    </m.div>
   );
 }
 
@@ -58,6 +66,7 @@ function useScrollbarWhileScrolling(timeoutMs = 800) {
 
 export function WatchpartyMemberBar({
   members,
+  memberVotePulses,
   currentUserId,
   selectedMember,
   onSelectMember,
@@ -68,7 +77,7 @@ export function WatchpartyMemberBar({
 
   return (
     <LayoutGroup id="watchparty-members">
-      <div className="relative min-h-[88px]">
+      <m.div className="relative min-h-[96px]">
         <AnimatePresence mode="popLayout" initial={false}>
           {isDetail && selectedMember ? (
             <m.div
@@ -98,6 +107,7 @@ export function WatchpartyMemberBar({
               >
                 <MemberAvatar
                   userId={selectedMember.userId}
+                  pulseGeneration={memberVotePulses[selectedMember.userId] ?? 0}
                   highlighted
                   layoutId={`watchparty-avatar-${selectedMember.userId}`}
                 />
@@ -116,7 +126,7 @@ export function WatchpartyMemberBar({
             <m.div
               key="list"
               className={cn(
-                "scrollbar-overlay -mx-1 flex max-h-46 min-w-0 max-w-full flex-wrap gap-3 overflow-y-auto overflow-x-hidden px-1 pb-1",
+                "scrollbar-overlay -mx-1 flex max-h-46 min-w-0 max-w-full flex-wrap gap-x gap-y-2 overflow-y-auto px-1 py-2",
                 isScrolling && "is-scrolling",
               )}
               initial={{ opacity: 0 }}
@@ -127,8 +137,6 @@ export function WatchpartyMemberBar({
               onScroll={onScroll}
             >
               {members.map((member) => {
-                const isSelf = currentUserId === member.userId;
-
                 return (
                   <button
                     key={member.userId}
@@ -141,11 +149,11 @@ export function WatchpartyMemberBar({
                   >
                     <MemberAvatar
                       userId={member.userId}
+                      pulseGeneration={memberVotePulses[member.userId] ?? 0}
                       layoutId={`watchparty-avatar-${member.userId}`}
                     />
                     <span className="max-w-full truncate text-center text-[0.72rem] font-extrabold text-foreground">
                       {member.displayName}
-                      {isSelf ? " (du)" : ""}
                     </span>
                   </button>
                 );
@@ -153,7 +161,7 @@ export function WatchpartyMemberBar({
             </m.div>
           )}
         </AnimatePresence>
-      </div>
+      </m.div>
     </LayoutGroup>
   );
 }

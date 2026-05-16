@@ -139,6 +139,21 @@ body {
   background-color: color-mix(in srgb, var(--color-muted-foreground) 55%, transparent);
 }
 
+@keyframes avatar-vote-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+
+  45% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-highlight) 65%, transparent);
+  }
+}
+
+.avatar-vote-pulse-ring {
+  animation: avatar-vote-pulse 0.48s var(--ease-out-quint);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -147,5 +162,9 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .avatar-vote-pulse-ring {
+    animation: none;
   }
 }
